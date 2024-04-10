@@ -6,7 +6,7 @@ from langchain.text_splitter import CharacterTextSplitter, MarkdownTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.document_loaders import DirectoryLoader
 from langchain.document_loaders.image import UnstructuredImageLoader
-from langchain.document_loaders import ImageCaptionLoader
+from langchain_community.document_loaders import ImageCaptionLoader
 
 # 向量数据库路径
 vecdb_directory: str = os.path.join(
@@ -14,10 +14,12 @@ vecdb_directory: str = os.path.join(
 )
 
 # 存放图像摘要的文件夹的路径
-docs_directory = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "docs")
+docs_directory = os.path.join(os.path.dirname(
+    os.path.abspath(sys.argv[0])), "docs")
 
 # 存放图像的文件夹的路径
-imgs_directory = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "imgs")
+imgs_directory = os.path.join(os.path.dirname(
+    os.path.abspath(sys.argv[0])), "imgs")
 
 
 images = []
@@ -38,7 +40,7 @@ for root, dirs, files in os.walk(imgs_directory):
                 print(f"序号:{i} 已加载")
                 i += 1
                 print(f"metadata:{tmp[0].metadata}")
-                print(f"content:{tmp[0].content}")
+                print(f"content:{tmp[0].page_content}")
 
 text_splitter = CharacterTextSplitter(chunk_size=10, chunk_overlap=5)
 splits = text_splitter.split_documents(images)
