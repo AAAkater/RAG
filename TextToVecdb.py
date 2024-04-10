@@ -1,5 +1,3 @@
-
-
 import os
 import sys
 from langchain_community.vectorstores import Chroma
@@ -9,19 +7,17 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.document_loaders import DirectoryLoader
 
 # 向量数据库路径
-vecdb_directory: str = os.path.join(os.path.dirname(
-    os.path.abspath(sys.argv[0])), 'vecdb')
+vecdb_directory: str = os.path.join(
+    os.path.dirname(os.path.abspath(sys.argv[0])), "vecdb"
+)
 
 # 存放图像摘要的文件夹的路径
-docs_directory = os.path.join(os.path.dirname(
-    os.path.abspath(sys.argv[0])), 'docs')
+docs_directory = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "docs")
 
 # 存放图像的文件夹的路径
-imgs_directory = os.path.join(os.path.dirname(
-    os.path.abspath(sys.argv[0])), 'imgs')
+imgs_directory = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "imgs")
 
-text_splitter = CharacterTextSplitter(
-    chunk_size=200, chunk_overlap=20)
+text_splitter = CharacterTextSplitter(chunk_size=200, chunk_overlap=20)
 
 docs = []
 # 读取docs文件夹下的所有txt
@@ -51,10 +47,12 @@ try:
     vectordb = Chroma.from_documents(
         documents=splits,
         embedding=OpenAIEmbeddings(),
-        persist_directory=vecdb_directory
+        persist_directory=vecdb_directory,
     )
     # 保存到本地
     vectordb.persist()
 except Exception as e:
-    print("载入数据库")
+    print("载入数据库失败")
     print(e)
+else:
+    print("载入数据库成功")
