@@ -8,8 +8,8 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.document_loaders.image import UnstructuredImageLoader
 from langchain_community.document_loaders import ImageCaptionLoader
 from langchain_community.docstore.document import Document
-from .src.MLLM import model
-from .src.MLLM import tokenizer
+from src.MLLM import model
+from src.MLLM import tokenizer
 from PIL import Image
 
 # 向量数据库路径
