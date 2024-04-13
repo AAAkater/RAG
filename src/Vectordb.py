@@ -6,7 +6,7 @@ import chromadb
 from chromadb.api import ClientAPI
 from langchain_community.vectorstores import Chroma
 from langchain_community.docstore.document import Document
-from langchain.text_splitter import CharacterTextSplitter, MarkdownTextSplitter
+from langchain.text_splitter import CharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 
 
@@ -56,3 +56,11 @@ class vecdb:
 if __name__ == "__main__":
     # print(vecdb.path)
     print(vecdb.path)
+
+    # doc = Document(
+    #     page_content="xyz",
+    #     metadata={"image_path": "F:\\Desktop\\vsc\\python\\RAG\\imgs\\bkg.png"},
+    # )
+    collection = vecdb(collection_name="langchain")
+    # collection.add(doc)
+    collection.select()
