@@ -6,14 +6,15 @@ from PIL import Image
 
 # 选择MLLM模型
 class MLLM_model:
-    _model_id = "vikhyatk/moondream2"
-    _revision = "2024-04-02"
-    _model: Any = None
-    _tokenizer: Any = None
+    _model_id = "vikhyatk/moondream2"  # 模型id
+    _revision = "2024-04-02"  # 模型版本
+    _model: Any = None  # 模型
+    _tokenizer: Any = None  # 分词器
     question: str = "Generate a summary of this image"
 
     def __init__(self):
         try:
+            # 模型
             self._model = AutoModelForCausalLM.from_pretrained(
                 pretrained_model_name_or_path=self._model_id,
                 trust_remote_code=True,
