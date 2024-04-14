@@ -1,6 +1,4 @@
-from http import client
 import os
-import sys
 from typing import Any, List
 import chromadb
 from chromadb.api import ClientAPI
@@ -13,7 +11,7 @@ from langchain_openai import OpenAIEmbeddings
 class vecdb:
     path: str = os.path.abspath(path="./database/")
     client: ClientAPI = chromadb.PersistentClient(path)
-    collection_name: str
+    collection_name: str = "langchain"
 
     def __init__(self, collection_name: str) -> None:
         self.collection = self.client.get_or_create_collection(collection_name)
@@ -51,6 +49,14 @@ class vecdb:
         except Exception as e:
             print("载入数据库失败")
             print(e)
+
+    @staticmethod
+    def retriever(vecdb_path: str):
+        db = Chroma(
+            embedding_function=OpenAIEmbeddings(),
+            persist_directory=vecdb_path,
+        )
+        return db.as_retriever()
 
 
 if __name__ == "__main__":
