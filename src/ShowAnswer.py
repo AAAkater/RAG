@@ -41,7 +41,7 @@ test = {
 
 def show(LLM_answer: dict[str, list[Document]]):
 
-    print(f"query:{LLM_answer['query']}")
+    print(f"query:{LLM_answer['query']}\n")
     print(f"result:{LLM_answer['result']}")
     num_images = len(LLM_answer["source_documents"])
     num_rows = math.ceil(num_images / 5)

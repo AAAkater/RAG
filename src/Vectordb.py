@@ -50,13 +50,20 @@ class vecdb:
             print("载入数据库失败")
             print(e)
 
+    def similarity_search(self, query: str):
+        db = Chroma(
+            embedding_function=OpenAIEmbeddings(),
+            persist_directory=self.path,
+        )
+        return db.similarity_search(query)
+
     @staticmethod
     def retriever(vecdb_path: str):
         db = Chroma(
             embedding_function=OpenAIEmbeddings(),
             persist_directory=vecdb_path,
         )
-        return db.as_retriever()
+        return db.as_retriever(search_type="mmr", search_kwargs={"k": 10})
 
 
 if __name__ == "__main__":
@@ -69,4 +76,10 @@ if __name__ == "__main__":
     # )
     collection = vecdb(collection_name="langchain")
     # collection.add(doc)
-    collection.select()
+    # collection.select()
+    ans = collection.similarity_search(
+        "give me some information about the traffic light"
+    )
+
+    print(len(ans))
+    print(ans)
