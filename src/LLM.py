@@ -14,4 +14,6 @@ class LLM_model:
         )
 
     def invoke(self, input):
-        return self.qa_chain.invoke(f"give me some information about the {input}")
+        prompt1: str = f"How many {input} are there?"
+        prompt2: str = f"give me some information about the {input}"
+        return self.qa_chain.invoke(prompt2)
