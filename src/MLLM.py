@@ -1,4 +1,5 @@
 from typing import Any
+import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from langchain_community.docstore.document import Document
 from PIL import Image
@@ -19,7 +20,8 @@ class MLLM_model:
                 pretrained_model_name_or_path=self._model_id,
                 trust_remote_code=True,
                 revision=self._revision,
-            )
+                torch_dtype=torch.float16,
+            ).to("cuda")
             self._tokenizer = AutoTokenizer.from_pretrained(
                 pretrained_model_name_or_path=self._model_id, revision=self._revision
             )
@@ -46,4 +48,5 @@ class MLLM_model:
 
 
 if __name__ == "__main__":
-    print(MLLM_model.question)
+    mllm = MLLM_model()
+    print(mllm.answer("F:\\Desktop\\vsc\\python\\RAG\\imgs\\cry2.png"))
