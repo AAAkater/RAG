@@ -10,7 +10,7 @@ class Moondream:
     _revision = "2024-04-02"  # 模型版本
     _model: Any = None  # 模型
     _tokenizer: Any = None  # 分词器
-    prompt: str = "Descirbe this image: "
+    prompt: str = "Describe this image: "
 
     def __init__(self):
         try:
