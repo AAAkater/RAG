@@ -11,7 +11,7 @@ from ..MLLM.Moondream import Moondream
 
 
 class Milus:
-    uri: str = "http://localhost:19530"
+    uri: str = "http://127.0.0.1:19530"
     client: Any
     mllm: Any
     embedding: Any
@@ -66,7 +66,9 @@ class Milus:
         self.mllm = Moondream()
         print("Preparing datasets...")
         prepare(imgs_path)
-        for image_path in glob.glob(f"{image_path}/**/*.jpg", recursive=True):
+        for i, image_path in enumerate(
+            glob.glob(f"{imgs_path}/**/*.jpg", recursive=True), start=1
+        ):
             sha256: str = Path(image_path).stem
 
             if len(
@@ -80,8 +82,8 @@ class Milus:
             desc = self.mllm.answer(image_path)
             desc_vec = self.embedding.encode(desc)
 
-            print(f"{sha256=}\n")
-            print(f"{'DESC: '}{desc}")
+            print("\033[34m" + f"序号 {i} {'DESC: '}{desc}" + "\033[0m")
+            print("\033[33m" + f"{sha256=}\n" + "\033[0m")
 
             self.client.insert(
                 collection_name=collection_name,
@@ -96,6 +98,6 @@ class Milus:
             connection_args={"uri": self.uri},
             text_field="desc",
             vector_field="desc_vec",
-            metadata_field="id",
+            primary_field="id",
         )
-        return images_collection.as_retriever()
+        return images_collection.as_retriever(search_type="mmr", search_kwargs={"k": 5})
