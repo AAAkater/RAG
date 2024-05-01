@@ -7,11 +7,7 @@ from langchain.chains.qa_with_sources import load_qa_with_sources_chain
 class gpt3:
     def __init__(self, db_retriever) -> None:
 
-        self.llm = ChatOpenAI(
-            temperature=0,
-            # openai_api_base="https://api.nextapi.fun/v1",
-            # openai_api_key="ak-wByeadNm0Hxt6M6VaHBBYusiYPaQYDEYZzlybBzBSU7xJysf",
-        )
+        self.llm = ChatOpenAI(temperature=0)
         self.qa_chain = load_qa_with_sources_chain(
             llm=self.llm,
             chain_type="stuff",
@@ -22,14 +18,10 @@ class gpt3:
     def invoke(self, input):
         prompt1: str = f"How many {input} are there?"
         prompt2: str = f"give me some information about the {input}"
-        return self.qa_chain.invoke(prompt2)
+        return self.qa_chain.invoke({"query": prompt1})
 
 
 if __name__ == "__main__":
-    llm = ChatOpenAI(
-        temperature=0,
-        openai_api_base="https://api.nextapi.fun/v1",
-        openai_api_key="ak-wByeadNm0Hxt6M6VaHBBYusiYPaQYDEYZzlybBzBSU7xJysf",
-    )
+    llm = ChatOpenAI(temperature=0)
     answer = llm.invoke("你好")
     print(answer)
