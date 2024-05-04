@@ -84,6 +84,7 @@ async function handleClear() {
           class="p-4 flex gap-2 border-b"
         >
           <svg
+            v-if="item.from === 'user'"
             xmlns="http://www.w3.org/2000/svg"
             width="20"
             height="20"
@@ -97,6 +98,26 @@ async function handleClear() {
           >
             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
             <circle cx="12" cy="7" r="4" />
+          </svg>
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="opacity-75 flex-shrink-0"
+          >
+            <path d="M12 6V2H8" />
+            <path d="m8 18-4 4V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Z" />
+            <path d="M2 12h2" />
+            <path d="M9 11v2" />
+            <path d="M15 11v2" />
+            <path d="M20 12h2" />
           </svg>
           <div class="flex flex-grow flex-col">
             <div v-if="item.from === 'assistant'">
@@ -134,8 +155,12 @@ async function handleClear() {
             stroke-linejoin="round"
             class="opacity-75 flex-shrink-0"
           >
-            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
+            <path d="M12 6V2H8" />
+            <path d="m8 18-4 4V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Z" />
+            <path d="M2 12h2" />
+            <path d="M9 11v2" />
+            <path d="M15 11v2" />
+            <path d="M20 12h2" />
           </svg>
           <div class="flex flex-grow flex-col">
             <div>
