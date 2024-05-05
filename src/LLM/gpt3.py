@@ -1,24 +1,149 @@
-from langchain_community.vectorstores import Chroma
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain.chains import RetrievalQA
-from langchain.chains.qa_with_sources import load_qa_with_sources_chain
+from typing import Any, Dict, List
+from langchain_core.runnables.base import Runnable
+from langchain_openai import ChatOpenAI
+
+# from langchain.chains.retrieval_qa.base import RetrievalQA
+import math
+import matplotlib.pyplot as plt
+from langchain_community.docstore.document import Document
+from langchain.chains.retrieval import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.prompts import MessagesPlaceholder
+from langchain.chains.retrieval import create_retrieval_chain
+from langchain.chains.history_aware_retriever import create_history_aware_retriever
+from langchain.prompts import ChatPromptTemplate
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+from langchain_core.chat_history import BaseChatMessageHistory
+from langchain.prompts import PromptTemplate
+
+from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain_core.pydantic_v1 import BaseModel, Field
+from langchain_core.messages import BaseMessage
 
 
-class gpt3:
+class InMemoryHistory(BaseChatMessageHistory, BaseModel):
+    """In memory implementation of chat message history."""
+
+    messages: List[BaseMessage] = Field(default_factory=list)
+
+    def add_messages(self, messages: List[BaseMessage]) -> None:
+        """Add a list of messages to the store"""
+        self.messages.extend(messages)
+
+    def clear(self) -> None:
+        self.messages = []
+
+
+class Gpt3:
+    contextualize_q_system_prompt = """Given a chat history and the latest user question \
+    which might reference context in the chat history, formulate a standalone question \
+    which can be understood without the chat history. Do NOT answer the question, \
+    just reformulate it if needed and otherwise return it as is.
+    
+
+    """
+
+    qa_system_prompt = """You are an assistant for question-answering tasks. \
+    Use the following pieces of retrieved context to answer the question. \
+    If you don't know the answer, just say that you don't know. \
+    Use three sentences maximum and keep the answer concise.\
+    
+    chat history:
+    {context}
+    """
+
     def __init__(self, db_retriever) -> None:
-
         self.llm = ChatOpenAI(temperature=0)
-        self.qa_chain = RetrievalQA.from_chain_type(
-            llm=self.llm,
-            chain_type="stuff",
-            retriever=db_retriever,
-            return_source_documents=True,
+        self.chat_history = {}
+
+        self.history_aware_retriever: Runnable[Any, List[Document]] = (
+            create_history_aware_retriever(
+                llm=self.llm,
+                retriever=db_retriever,
+                prompt=ChatPromptTemplate.from_messages(
+                    messages=[
+                        # SystemMessage(content=self.contextualize_q_system_prompt),
+                        ("system", self.contextualize_q_system_prompt),
+                        MessagesPlaceholder(variable_name="chat_history"),
+                        ("human", "{input}"),
+                        # HumanMessage(content="input"),
+                    ]
+                ),
+            )
         )
 
-    def invoke(self, input):
-        prompt1: str = f"How many {input} are there?"
-        prompt2: str = f"give me some information about the {input}"
-        return self.qa_chain.invoke({"query": prompt1})
+        self.document_chain: Runnable[Dict[str, Any], Any] = (
+            create_stuff_documents_chain(
+                llm=self.llm,
+                prompt=ChatPromptTemplate.from_messages(
+                    messages=[
+                        # SystemMessage(content=self.qa_system_prompt),
+                        ("system", self.qa_system_prompt),
+                        MessagesPlaceholder(variable_name="chat_history"),
+                        ("human", "{input}"),
+                        # HumanMessage(content="input"),
+                    ]
+                ),
+            )
+        )
+        self.rag_chain = create_retrieval_chain(
+            retriever=self.history_aware_retriever,
+            combine_docs_chain=self.document_chain,
+        )
+
+        self.conversational_rag_chain = RunnableWithMessageHistory(
+            runnable=self.rag_chain,
+            get_session_history=self.get_session_history,
+            input_messages_key="input",
+            history_messages_key="chat_history",
+            output_messages_key="answer",
+        )
+
+    def invoke(self, input: str):
+        result = self.conversational_rag_chain.invoke(
+            {"input": input}, config={"configurable": {"session_id": "test"}}
+        )
+        return result
+
+    def get_session_history(self, session_id: str) -> BaseChatMessageHistory:
+        if session_id not in self.chat_history:
+            self.chat_history[session_id] = InMemoryHistory()
+        return self.chat_history[session_id]
+
+    def clear_history(self):
+        self.chat_history.clear()
+
+    def show_images(self, result: dict[str, list[Document]]):
+        """显示被检索到的图片
+
+        Args:
+            result (dict[str, list[Document]]): LLM返回的信息
+        """
+        num_images = len(result["source_documents"])
+        num_rows = math.ceil(num_images / 5)
+        num_cols = min(num_images, 5)
+
+        fig, axes = plt.subplots(num_rows, num_cols, figsize=(12, 3 * num_rows))
+
+        for i, doc in enumerate(result["source_documents"]):
+            image_path = f"./imgs/{doc.metadata['id']}.jpg"
+            if num_rows == 1:
+                ax = axes[i % num_cols]  # 获取当前子图对象（一行情况）
+            else:
+                ax = axes[i // num_cols, i % num_cols]
+            image = plt.imread(image_path)
+            ax.imshow(image)
+            ax.axis("off")
+
+        if num_images < num_rows * num_cols:
+            for j in range(num_images, num_rows * num_cols):
+                if num_rows == 1:
+                    fig.delaxes(axes[j])
+                else:
+                    fig.delaxes(axes[j // num_cols, j % num_cols])
+
+        plt.tight_layout()
+        plt.show()
 
 
 if __name__ == "__main__":
