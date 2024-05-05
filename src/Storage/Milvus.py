@@ -10,7 +10,7 @@ from ..Embeddings.multi_qa_mpnet_base_dot_v1 import Embedding
 from ..MLLM.Moondream import Moondream
 
 
-class Milus:
+class Milvus:
     uri: str = "http://127.0.0.1:19530"
     client: Any
     mllm: Any
@@ -73,7 +73,7 @@ class Milus:
 
             if len(
                 self.client.query(
-                    collection_name="images", filter='id == "%s"' % sha256
+                    collection_name=collection_name, filter='id == "%s"' % sha256
                 )
             ):
                 print(sha256, "SKIPPED")
