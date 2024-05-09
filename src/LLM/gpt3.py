@@ -1,24 +1,23 @@
-from typing import Any, Dict, List
-from langchain_core.runnables.base import Runnable
-from langchain_openai import ChatOpenAI
-
-# from langchain.chains.retrieval_qa.base import RetrievalQA
 import math
-import matplotlib.pyplot as plt
-from langchain_community.docstore.document import Document
-from langchain.chains.retrieval import create_retrieval_chain
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_core.prompts import MessagesPlaceholder
-from langchain.chains.retrieval import create_retrieval_chain
-from langchain.chains.history_aware_retriever import create_history_aware_retriever
-from langchain.prompts import ChatPromptTemplate
-from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
-from langchain_core.chat_history import BaseChatMessageHistory
-from langchain.prompts import PromptTemplate
+from typing import Any, Dict, List
 
-from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_core.pydantic_v1 import BaseModel, Field
+import matplotlib.pyplot as plt
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains.history_aware_retriever import create_history_aware_retriever
+from langchain.chains.retrieval import create_retrieval_chain
+from langchain.prompts import (
+    ChatPromptTemplate,
+    HumanMessagePromptTemplate,
+    SystemMessagePromptTemplate,
+)
+from langchain_community.docstore.document import Document
+from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.messages import BaseMessage
+from langchain_core.prompts import MessagesPlaceholder
+from langchain_core.pydantic_v1 import BaseModel, Field
+from langchain_core.runnables.base import Runnable
+from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain_openai import ChatOpenAI
 
 
 class InMemoryHistory(BaseChatMessageHistory, BaseModel):
@@ -38,17 +37,14 @@ class Gpt3:
     contextualize_q_system_prompt = """Given a chat history and the latest user question \
     which might reference context in the chat history, formulate a standalone question \
     which can be understood without the chat history. Do NOT answer the question, \
-    just reformulate it if needed and otherwise return it as is.
-    
-
+    just reformulate it if needed and otherwise return it as is.\
     """
 
     qa_system_prompt = """You are an assistant for question-answering tasks. \
     Use the following pieces of retrieved context to answer the question. \
     If you don't know the answer, just say that you don't know. \
     Use three sentences maximum and keep the answer concise.\
-    
-    chat history:
+    chat history:\
     {context}
     """
 
@@ -56,41 +52,44 @@ class Gpt3:
         self.llm = ChatOpenAI(temperature=0)
         self.chat_history = {}
 
+        # 检索模板
         self.history_aware_retriever: Runnable[Any, List[Document]] = (
             create_history_aware_retriever(
                 llm=self.llm,
                 retriever=db_retriever,
                 prompt=ChatPromptTemplate.from_messages(
                     messages=[
-                        # SystemMessage(content=self.contextualize_q_system_prompt),
-                        ("system", self.contextualize_q_system_prompt),
+                        SystemMessagePromptTemplate.from_template(
+                            template=self.contextualize_q_system_prompt
+                        ),
                         MessagesPlaceholder(variable_name="chat_history"),
-                        ("human", "{input}"),
-                        # HumanMessage(content="input"),
+                        HumanMessagePromptTemplate.from_template(template="{input}"),
                     ]
                 ),
             )
         )
-
+        # 对话模板
         self.document_chain: Runnable[Dict[str, Any], Any] = (
             create_stuff_documents_chain(
                 llm=self.llm,
                 prompt=ChatPromptTemplate.from_messages(
                     messages=[
-                        # SystemMessage(content=self.qa_system_prompt),
-                        ("system", self.qa_system_prompt),
+                        SystemMessagePromptTemplate.from_template(
+                            template=self.qa_system_prompt
+                        ),
                         MessagesPlaceholder(variable_name="chat_history"),
-                        ("human", "{input}"),
-                        # HumanMessage(content="input"),
+                        HumanMessagePromptTemplate.from_template(template="{input}"),
                     ]
                 ),
             )
         )
+        # 构建RAG对话链
         self.rag_chain = create_retrieval_chain(
             retriever=self.history_aware_retriever,
             combine_docs_chain=self.document_chain,
         )
-
+        
+        # 引入聊天历史
         self.conversational_rag_chain = RunnableWithMessageHistory(
             runnable=self.rag_chain,
             get_session_history=self.get_session_history,
