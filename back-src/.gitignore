@@ -1,3 +1,13 @@
-database/
-images/
-__pycache__/
+__pycache__
+
+/app/metadata/images/*
+!/app/metadata/images/__init__.py
+
+/app/metadata/audio/*
+!/app/metadata/audio/__init__.py
+
+/app/metadata/document/*
+!/app/metadata/document/__init__.py
+
+/app/metadata/video/*
+!/app/metadata/video/__init__.py
