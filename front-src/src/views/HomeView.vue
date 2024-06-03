@@ -7,6 +7,7 @@ import { nextTick, ref } from 'vue'
 const context = ref<ContextItem[]>([])
 
 const input = ref('')
+const isHover = ref(false)
 const isLoading = ref(false)
 const scrollRef = ref<HTMLDivElement | null>(null)
 
@@ -189,6 +190,71 @@ async function handleClear() {
     </div>
 
     <div class="w-full p-4 flex gap-2 items-center">
+      <div class="w-auto">
+        <div
+          v-if="isHover"
+          @mouseleave="isHover = false"
+          class="absolute w-auto h-[100px] bg-gray-200 rounded-lg bottom-[70px] flex flex-col justify-start items-start p-2 drop-shadow-xl"
+        >
+          <button class="flex flex-row gap-2 items-center h-[50px] hover:text-gray-400">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="feather feather-file"
+            >
+              <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+              <polyline points="13 2 13 9 20 9"></polyline>
+            </svg>
+            上传文档
+          </button>
+          <button class="flex flex-row gap-2 items-center h-[50px] hover:text-gray-400">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="feather feather-image"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            上传图片
+          </button>
+        </div>
+        <div
+          @mouseover="isHover = true"
+          class="bg-gray-900 p-2 rounded-lg text-white hover:opacity-75"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
+        </div>
+      </div>
       <div class="flex-grow relative">
         <input
           class="w-full border rounded-lg shadow-sm text-lg px-3 h-12 outline-none disabled:text-gray-600"
