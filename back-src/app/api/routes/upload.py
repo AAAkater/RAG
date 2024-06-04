@@ -1,11 +1,12 @@
 import os
+from typing import List
 
 import app.metadata.audio as audio
 import app.metadata.document as document
-import app.metadata.images as images
+import app.metadata.image as image
 import app.metadata.video as video
 from app.model.model import UploadResponse
-from fastapi import APIRouter, UploadFile
+from fastapi import APIRouter, File, UploadFile
 
 router = APIRouter()
 
@@ -14,7 +15,7 @@ router = APIRouter()
 async def upload_image(file: UploadFile) -> UploadResponse:
     try:
         # 写入metadata/images
-        path: str = os.path.join(os.path.dirname(images.__file__), file.filename)  # type: ignore
+        path: str = os.path.join(os.path.dirname(image.__file__), file.filename)  # type: ignore
         with open(path, "wb") as f:
             f.write(await file.read())
         return UploadResponse(code=0, data="上传成功", message="ok")
@@ -41,8 +42,9 @@ async def upload_audio(file: UploadFile) -> UploadResponse:
     try:
         # 写入metadata/audio
         path: str = os.path.join(os.path.dirname(audio.__file__), file.filename)  # type: ignore
+        content = await file.read()
         with open(path, "wb") as f:
-            f.write(await file.read())
+            f.write(content)
         return UploadResponse(code=0, data="上传成功", message="ok")
     except Exception as e:
         print(e)
