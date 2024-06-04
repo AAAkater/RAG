@@ -128,7 +128,7 @@ async function handleClear() {
               <div class="mt-2">{{ item.data }}</div>
               <div
                 v-if="item && item.metadata && item.metadata.length !== 0"
-                class="mt-2 border rounded-lg p-2 flex gap-2 flex-wrap"
+                class="mt-2 border rounded-lg p-2 flex flex-col gap-2 flex-wrap"
               >
                 <div
                   v-for="_item in item.metadata.sort((a, b) => a.type.localeCompare(b.type))"

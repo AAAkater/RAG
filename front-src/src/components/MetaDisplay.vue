@@ -9,7 +9,6 @@ const downloadFile = async (url: string, type: string) => {
       withCredentials: false
     })
     .then((e) => {
-      console.log(e)
       const href = URL.createObjectURL(e.data)
       const aLink = document.createElement('a')
       aLink.style.display = 'none'
@@ -28,15 +27,18 @@ const { filename, id, type } = defineProps({
 </script>
 
 <template>
-  <h5>{{ filename }}</h5>
-  <div v-if="type == `image`">
+  <div
+    class="border-gray-900 rounded-md p-2 flex flex-row justify-between flex-wrap gap-2 border-2"
+  >
+    <span v-if="type !== `image`">{{ filename }}</span>
     <div
+      v-if="type == `image`"
       style="position: relative; width: 100%; height: 100%"
-      class="text-transparent hover:text-slate-950"
-      @click="downloadFile('/getImage?id=b_aea1b74356186eb76b54a64359eed5d0', 'png')"
+      class="text-transparent hover:text-slate-950 w-auto"
+      @click="downloadFile('/getImage?id=b_aea1b74356186eb76b54a64359eed5d0.jpg', 'png')"
     >
       <svg
-        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)"
+        style="position: absolute; top: 50%; left: 60px; transform: translate(-50%, -50%)"
         xmlns="http://www.w3.org/2000/svg"
         width="24"
         height="24"
@@ -52,18 +54,43 @@ const { filename, id, type } = defineProps({
         <line x1="12" y1="15" x2="12" y2="3" />
       </svg>
       <img
-        :src="apiBase + `/getImage?id=b_aea1b74356186eb76b54a64359eed5d0`"
-        class="w-[120px] aspect-square object-cover rounded-md hover:opacity-50"
+        :src="apiBase + `/getImage?id=b_aea1b74356186eb76b54a64359eed5d0.jpg`"
+        class="w-[120px] aspect-square object-cover rounded-md hover:opacity-50 cursor-pointer"
       />
     </div>
-  </div>
-  <div v-else-if="type == `pdf`">
-    <iframe :src="apiBase + `/getDocument?id=第五次作业答案`" width="100%" height="100%">
-      This browser does not support PDFs. Please download the PDF to view it:
-      <a href="/index.pdf">Download PDF</a>
-    </iframe>
-    <a @click="downloadFile(`/getDocument?id=第五次作业答案`, 'pdf')">{{
-      apiBase + `/getDocument?id=第五次作业答案`
-    }}</a>
+    <div v-else-if="type == `pdf`" class="justify-self-end">
+      <!-- <iframe
+        v-if="preview"
+        :src="apiBase + `/getDocument?id=第五次作业答案.pdf`"
+        width="auto"
+        height="200px"
+        class="bottom-4"
+      >
+        This browser does not support PDFs. Please download the PDF to view it:
+        <a href="/index.pdf">Download PDF</a>
+      </iframe> -->
+      <a
+        class="hover:text-gray-500 text-sm underline underline-offset-4 decoration-1 cursor-pointer"
+        :href="apiBase + `/getDocument?id=第五次作业答案.pdf`"
+        target="_blank"
+        >{{ apiBase + `/getDocument?id=第五次作业答案.pdf` }}</a
+      >
+    </div>
+    <div v-else-if="type == `mp3`" class="justify-self-end">
+      <a
+        class="hover:text-gray-500 text-sm underline underline-offset-4 decoration-1 cursor-pointer"
+        :href="apiBase + `/getAudio?id=11582.mp3`"
+        target="_blank"
+        >{{ apiBase + `/getAudio?id=11582.mp3` }}</a
+      >
+    </div>
+    <div v-else-if="type == `mp4`">
+      <a
+        class="hover:text-gray-500 text-sm underline underline-offset-4 decoration-1 cursor-pointer"
+        :href="apiBase + `//getVideo?id=trailer.mp4`"
+        target="_blank"
+        >{{ apiBase + `//getVideo?id=trailer.mp4` }}</a
+      >
+    </div>
   </div>
 </template>
