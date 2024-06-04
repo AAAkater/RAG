@@ -1,7 +1,9 @@
 import os
 
+import app.metadata.audio as audio
 import app.metadata.document as document
 import app.metadata.images as images
+import app.metadata.video as video
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 
@@ -20,7 +22,7 @@ async def get_image(id: str) -> FileResponse:
 
 
 @router.get("/getDocument")
-async def get_pdf(id: str):
+async def get_pdf(id: str) -> FileResponse:
 
     pdf_path: str = os.path.join(os.path.dirname(document.__file__), f"{id}.pdf")
 
@@ -28,3 +30,25 @@ async def get_pdf(id: str):
         raise HTTPException(status_code=404, detail="pdf不存在")
 
     return FileResponse(path=pdf_path, media_type="application/pdf")
+
+
+@router.get("/getAudio")
+async def get_audio(id: str) -> FileResponse:
+
+    pdf_path: str = os.path.join(os.path.dirname(audio.__file__), f"{id}.mp3")
+
+    if not os.path.exists(pdf_path):
+        raise HTTPException(status_code=404, detail="音频不存在")
+
+    return FileResponse(path=pdf_path, media_type="audio/mpeg")
+
+
+@router.get("/getVideo")
+async def get_video(id: str) -> FileResponse:
+
+    pdf_path: str = os.path.join(os.path.dirname(video.__file__), f"{id}.mp4")
+
+    if not os.path.exists(pdf_path):
+        raise HTTPException(status_code=404, detail="视频不存在")
+
+    return FileResponse(path=pdf_path, media_type="video/mp4")
