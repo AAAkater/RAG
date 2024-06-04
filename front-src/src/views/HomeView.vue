@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import MetaDisplay from '@/components/MetaDisplay.vue'
 import { apiBase } from '@/constants'
 import type { ContextItem } from '@/types'
 import axios from 'axios'
 import { nextTick, ref } from 'vue'
-
 const context = ref<ContextItem[]>([])
 
 const input = ref('')
@@ -27,15 +27,17 @@ async function handleSend() {
     scrollRef.value?.scrollTo({ top: scrollRef.value?.scrollHeight, behavior: 'smooth' })
   )
 
-  const resp = await axios.get(apiBase + '/query', { params: { desc: input.value } })
+  const resp = await (await axios.get(apiBase + '/query', { params: { desc: input.value } })).data
   context.value.push({
     from: 'assistant',
     data: resp.data.answer,
-    imageIds: resp.data.ids
+    metadata: resp.data.metadata
   })
+  console.log(111)
 
   isLoading.value = false
   input.value = ''
+  console.log(context.value)
 
   nextTick(() =>
     scrollRef.value?.scrollTo({ top: scrollRef.value?.scrollHeight, behavior: 'smooth' })
@@ -122,18 +124,18 @@ async function handleClear() {
           </svg>
           <div class="flex flex-grow flex-col">
             <div v-if="item.from === 'assistant'">
-              <div class="text-sm h-5 leading-5 opacity-75">Image RAG</div>
+              <div class="text-sm h-5 leading-5 opacity-75">Multimodality RAG</div>
               <div class="mt-2">{{ item.data }}</div>
               <div
-                v-if="item.imageIds.length !== 0"
+                v-if="item && item.metadata && item.metadata.length !== 0"
                 class="mt-2 border rounded-lg p-2 flex gap-2 flex-wrap"
               >
-                <img
-                  v-for="id in item.imageIds"
-                  :key="id"
-                  :src="apiBase + '/image?id=' + id"
-                  class="w-[120px] aspect-square object-cover rounded-md"
-                />
+                <div
+                  v-for="_item in item.metadata.sort((a, b) => a.type.localeCompare(b.type))"
+                  :key="_item.id"
+                >
+                  <MetaDisplay :type="_item.type" :filename="_item.filename" :id="_item.id" />
+                </div>
               </div>
             </div>
             <div v-else>
