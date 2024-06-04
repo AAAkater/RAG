@@ -1,7 +1,7 @@
 __pycache__
 
-/app/metadata/images/*
-!/app/metadata/images/__init__.py
+/app/metadata/image/*
+!/app/metadata/image/__init__.py
 
 /app/metadata/audio/*
 !/app/metadata/audio/__init__.py
