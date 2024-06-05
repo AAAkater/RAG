@@ -13,6 +13,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.3.7",
     "axios": "^1.6.8",
     "file-saver": "^2.0.5",
     "vue": "^3.4.21",

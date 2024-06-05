@@ -26,14 +26,40 @@ async function handleSend() {
   nextTick(() =>
     scrollRef.value?.scrollTo({ top: scrollRef.value?.scrollHeight, behavior: 'smooth' })
   )
+  const resp = await axios
+    .get(apiBase + '/query', { timeout: 5000, params: { desc: input.value } })
+    .then((response) => response.data)
+    .catch((error: any) => {
+      console.log(error.code)
+      isLoading.value = false
 
-  const resp = await (await axios.get(apiBase + '/query', { params: { desc: input.value } })).data
+      if (error.code == 'ECONNABORTED') {
+        context.value.push({
+          from: 'assistant',
+          data: '请求超时，请检测当前网络环境。',
+          metadata: [],
+          success: false,
+          inquiryContent: input.value
+        })
+      } else {
+        context.value.push({
+          from: 'assistant',
+          data: '请求错误，请联系工作人员。',
+          metadata: [],
+          success: false,
+          inquiryContent: input.value
+        })
+      }
+      input.value = ''
+
+      return
+    })
   context.value.push({
     from: 'assistant',
     data: resp.data.answer,
-    metadata: resp.data.metadata
+    metadata: resp.data.metadata,
+    success: true
   })
-  console.log(111)
 
   isLoading.value = false
   input.value = ''
@@ -126,6 +152,28 @@ async function handleClear() {
             <div v-if="item.from === 'assistant'">
               <div class="text-sm h-5 leading-5 opacity-75">Multimodality RAG</div>
               <div class="mt-2">{{ item.data }}</div>
+              <div v-if="!item.success" class="text-sm h-5 leading-5 hover:opacity-30 w-auto">
+                <svg
+                  @click="
+                    () => {
+                      input = item.inquiryContent || ''
+                      handleSend()
+                    }
+                  "
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="size-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3"
+                  />
+                </svg>
+              </div>
               <div
                 v-if="item && item.metadata && item.metadata.length !== 0"
                 class="mt-2 border rounded-lg p-2 flex flex-col gap-2 flex-wrap"

@@ -8,6 +8,8 @@ export interface AssistantContextItem {
   from: 'assistant'
   data: string
   metadata: Meta[]
+  success: boolean
+  inquiryContent?: string
 }
 
 export interface UserContextItem {
