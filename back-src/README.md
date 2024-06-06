@@ -5,7 +5,7 @@
 后端配置
 
 ```bash
-cd back-src/app
+cd back-src
 pip install -r requirements.txt
 uvicorn main:app --reload #运行
 ```
