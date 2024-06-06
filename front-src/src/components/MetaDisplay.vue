@@ -35,7 +35,7 @@ const { filename, id, type } = defineProps({
       v-if="type == `image`"
       style="position: relative; width: 100%; height: 100%"
       class="text-transparent hover:text-slate-950 w-auto"
-      @click="downloadFile('/getImage?id=b_aea1b74356186eb76b54a64359eed5d0.jpg', 'png')"
+      @click="downloadFile('/getImage?id=' + id, 'png')"
     >
       <svg
         style="position: absolute; top: 50%; left: 60px; transform: translate(-50%, -50%)"
@@ -54,42 +54,32 @@ const { filename, id, type } = defineProps({
         <line x1="12" y1="15" x2="12" y2="3" />
       </svg>
       <img
-        :src="apiBase + `/getImage?id=b_aea1b74356186eb76b54a64359eed5d0.jpg`"
+        :src="apiBase + `/getImage?id=` + id"
         class="w-[120px] aspect-square object-cover rounded-md hover:opacity-50 cursor-pointer"
       />
     </div>
     <div v-else-if="type == `pdf`" class="justify-self-end">
-      <!-- <iframe
-        v-if="preview"
-        :src="apiBase + `/getDocument?id=第五次作业答案.pdf`"
-        width="auto"
-        height="200px"
-        class="bottom-4"
-      >
-        This browser does not support PDFs. Please download the PDF to view it:
-        <a href="/index.pdf">Download PDF</a>
-      </iframe> -->
       <a
         class="hover:text-gray-500 text-sm underline underline-offset-4 decoration-1 cursor-pointer"
-        :href="apiBase + `/getDocument?id=第五次作业答案.pdf`"
+        :href="apiBase + `/getDocument?id=` + id"
         target="_blank"
-        >{{ apiBase + `/getDocument?id=第五次作业答案.pdf` }}</a
+        >{{ apiBase + `/getDocument?id=` + id }}</a
       >
     </div>
     <div v-else-if="type == `mp3`" class="justify-self-end">
       <a
         class="hover:text-gray-500 text-sm underline underline-offset-4 decoration-1 cursor-pointer"
-        :href="apiBase + `/getAudio?id=11582.mp3`"
+        :href="apiBase + `/getAudio?id=` + id"
         target="_blank"
-        >{{ apiBase + `/getAudio?id=11582.mp3` }}</a
+        >{{ apiBase + `/getAudio?id=` + id }}</a
       >
     </div>
     <div v-else-if="type == `mp4`">
       <a
         class="hover:text-gray-500 text-sm underline underline-offset-4 decoration-1 cursor-pointer"
-        :href="apiBase + `//getVideo?id=trailer.mp4`"
+        :href="apiBase + `//getVideo?id=` + id"
         target="_blank"
-        >{{ apiBase + `//getVideo?id=trailer.mp4` }}</a
+        >{{ apiBase + `//getVideo?id=` + id }}</a
       >
     </div>
   </div>
