@@ -2,8 +2,29 @@
 import MetaDisplay from '@/components/MetaDisplay.vue'
 import { apiBase } from '@/constants'
 import type { ContextItem } from '@/types'
+import { CheckOutlined, ExclamationOutlined } from '@ant-design/icons-vue'
+import type { NotificationPlacement } from 'ant-design-vue'
+import { notification } from 'ant-design-vue'
 import axios from 'axios'
-import { nextTick, ref } from 'vue'
+import { h, nextTick, ref } from 'vue'
+const openNotification = (placement: NotificationPlacement, desc: string, status: boolean) => {
+  if (status)
+    notification.open({
+      message: `操作成功`,
+      description: desc,
+      placement,
+      icon: () => h(CheckOutlined, { style: 'color: green' }),
+      duration: 3
+    })
+  else
+    notification.open({
+      message: `请求错误！`,
+      description: desc,
+      placement,
+      icon: () => h(ExclamationOutlined, { style: 'color: red' }),
+      duration: 3
+    })
+}
 const context = ref<ContextItem[]>([])
 
 const input = ref('')
@@ -16,19 +37,38 @@ function readFile() {
   const inputFile = document.querySelector<HTMLInputElement>('#myFile')
   let file = inputFile?.files?.[0]
   uploadFile.value = file
-  console.log(111, uploadFile.value)
 }
 
 async function handleUpload(type: string) {
   if (uploadFile.value) {
+    if (
+      (type === 'Document' && uploadFile.value.type !== 'application/pdf') ||
+      (type === 'Video' && uploadFile.value.type !== 'video/mp4') ||
+      (type === 'Image' && uploadFile.value.type !== 'image/png') ||
+      (type === 'Audio' && uploadFile.value.type !== 'audio/wav')
+    ) {
+      openNotification('topRight', '请检查上传文件类型！', false)
+      return
+    }
+
     let formData = new FormData()
     formData.append('file', uploadFile.value)
-
-    await axios.post(apiBase + '/upload' + type, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
+    await axios
+      .post(apiBase + '/upload' + type, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        timeout: 5000
+      })
+      .then((response) => {
+        console.log(response.data)
+        openNotification('topRight', '上传成功！', true)
+      })
+      .catch((e) => {
+        console.log(e)
+        openNotification('topRight', '上传失败，请求错误！', false)
+        return
+      })
   }
 }
 
