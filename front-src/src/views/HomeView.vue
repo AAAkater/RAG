@@ -167,6 +167,7 @@ async function handleClear() {
           v-for="(item, index) in context"
           :key="index + item.from + item.data"
           class="p-4 flex gap-2 border-b"
+          :class="{ 'flex-row-reverse': item.from !== 'assistant' }"
         >
           <svg
             v-if="item.from === 'user'"
@@ -205,9 +206,11 @@ async function handleClear() {
             <path d="M20 12h2" />
           </svg>
           <div class="flex flex-grow flex-col">
-            <div v-if="item.from === 'assistant'">
+            <div v-if="item.from === 'assistant'" class="self-start">
               <div class="text-sm h-5 leading-5 opacity-75">Multimodality RAG</div>
-              <div class="mt-2 bg-blue-600 p-2 rounded-lg text-white">{{ item.data }}</div>
+              <div class="mt-2 bg-blue-600 p-2 rounded-lg text-white">
+                {{ item.data }}
+              </div>
               <div v-if="!item.success" class="text-sm h-5 leading-5 hover:opacity-30 w-auto">
                 <svg
                   @click="
@@ -243,9 +246,9 @@ async function handleClear() {
                 </div>
               </div>
             </div>
-            <div v-else>
-              <div class="text-sm h-5 leading-5 opacity-75">你</div>
-              <div class="mt-2">{{ item.data }}</div>
+            <div v-else class="self-end">
+              <div class="text-sm h-5 leading-5 opacity-75" style="direction: rtl">你</div>
+              <div class="mt-2 bg-gray-200 p-2 rounded-lg">{{ item.data }}</div>
             </div>
           </div>
         </div>
