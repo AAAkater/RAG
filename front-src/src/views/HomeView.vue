@@ -2,29 +2,11 @@
 import MetaDisplay from '@/components/MetaDisplay.vue'
 import { apiBase } from '@/constants'
 import type { ContextItem } from '@/types'
-import { CheckOutlined, ExclamationOutlined } from '@ant-design/icons-vue'
-import type { NotificationPlacement } from 'ant-design-vue'
-import { notification } from 'ant-design-vue'
+import openNotification from '@/util/openNotification'
+
 import axios from 'axios'
-import { h, nextTick, ref } from 'vue'
-const openNotification = (placement: NotificationPlacement, desc: string, status: boolean) => {
-  if (status)
-    notification.open({
-      message: `操作成功`,
-      description: desc,
-      placement,
-      icon: () => h(CheckOutlined, { style: 'color: green' }),
-      duration: 3
-    })
-  else
-    notification.open({
-      message: `请求错误！`,
-      description: desc,
-      placement,
-      icon: () => h(ExclamationOutlined, { style: 'color: red' }),
-      duration: 3
-    })
-}
+import { nextTick, ref } from 'vue'
+
 const context = ref<ContextItem[]>([])
 
 const input = ref('')
@@ -37,6 +19,7 @@ function readFile() {
   const inputFile = document.querySelector<HTMLInputElement>('#myFile')
   let file = inputFile?.files?.[0]
   uploadFile.value = file
+  console.log(uploadFile.value)
 }
 
 async function handleUpload(type: string) {
@@ -44,7 +27,9 @@ async function handleUpload(type: string) {
     if (
       (type === 'Document' && uploadFile.value.type !== 'application/pdf') ||
       (type === 'Video' && uploadFile.value.type !== 'video/mp4') ||
-      (type === 'Image' && uploadFile.value.type !== 'image/png') ||
+      (type === 'Image' &&
+        uploadFile.value.type !== 'image/png' &&
+        uploadFile.value.type !== 'image/jpeg') ||
       (type === 'Audio' && uploadFile.value.type !== 'audio/wav')
     ) {
       openNotification('topRight', '请检查上传文件类型！', false)
@@ -163,7 +148,17 @@ async function handleClear() {
           <path d="M20 12h2" />
         </svg>
       </div>
-      <div class="text-xl">想要检索些什么</div>
+      <span class="text-2xl">基于langchain的多模态知识库检索系统</span>
+      <div class="flex flex-col items-center gap-3">
+        <span class="text-lg">想要检索些什么</span>
+        <ul class="list-disc pl-5 space-y-2 text-gray-500">
+          <li class="text-xs">资源检索：在查找栏输入您要查找的关键字，然后单击“发送”按钮。</li>
+          <li class="text-xs">下载资源：在搜索结果中，您可以通过点击“下载”按钮将所需资源.</li>
+          <li class="text-xs">错误处理：如果搜索请求未能成功执行，系统会显示错误信息。</li>
+          <li class="text-xs">资源上传：您可以上传所需文件类型以扩大我们的数据库。</li>
+          <li class="text-xs">消息清理：您可以通过点击右侧垃圾箱图标清空所有消息记录。</li>
+        </ul>
+      </div>
     </div>
 
     <div v-else class="flex flex-col flex-grow relative w-full">
@@ -212,7 +207,7 @@ async function handleClear() {
           <div class="flex flex-grow flex-col">
             <div v-if="item.from === 'assistant'">
               <div class="text-sm h-5 leading-5 opacity-75">Multimodality RAG</div>
-              <div class="mt-2">{{ item.data }}</div>
+              <div class="mt-2 bg-blue-600 p-2 rounded-lg text-white">{{ item.data }}</div>
               <div v-if="!item.success" class="text-sm h-5 leading-5 hover:opacity-30 w-auto">
                 <svg
                   @click="
@@ -237,11 +232,12 @@ async function handleClear() {
               </div>
               <div
                 v-if="item && item.metadata && item.metadata.length !== 0"
-                class="mt-2 border rounded-lg p-2 flex flex-col gap-2 flex-wrap"
+                class="mt-2 border rounded-lg p-2 flex flex-row gap-2 flex-wrap"
               >
                 <div
                   v-for="_item in item.metadata.sort((a, b) => a.type.localeCompare(b.type))"
                   :key="_item.id"
+                  :class="{ 'w-full': _item.type !== 'image' }"
                 >
                   <MetaDisplay :type="_item.type" :filename="_item.filename" :id="_item.id" />
                 </div>
@@ -318,7 +314,13 @@ async function handleClear() {
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
           </svg>
 
-          <input id="myFile" type="file" @change="readFile" placeholder="uploadFile?.name" />
+          <input
+            id="myFile"
+            type="file"
+            accept=".jpg, .png, .pdf, .mp3, .mp4"
+            @change="readFile"
+            placeholder="uploadFile?.name"
+          />
           <button
             class="flex flex-row gap-2 items-center h-[50px] hover:text-gray-400"
             @click="handleUpload('Document')"
