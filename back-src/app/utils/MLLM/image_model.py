@@ -1,27 +1,26 @@
 from typing import Any
+
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
 from PIL import Image
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
 # 选择MLLM模型
 class Moondream:
-    _model_id = "vikhyatk/moondream2"  # 模型id
-    _revision = "2024-04-02"  # 模型版本
-    _model: Any = None  # 模型
-    _tokenizer: Any = None  # 分词器
+    model_id = "vikhyatk/moondream2"  # 模型id
+    revision = "2024-04-02"  # 模型版本
     prompt: str = "Describe this image: "
 
     def __init__(self):
         try:
-            self._model = AutoModelForCausalLM.from_pretrained(
-                pretrained_model_name_or_path=self._model_id,
+            self.__model = AutoModelForCausalLM.from_pretrained(
+                pretrained_model_name_or_path=self.model_id,
                 trust_remote_code=True,
-                revision=self._revision,
+                revision=self.revision,
                 torch_dtype=torch.float16,
             ).to("cuda")
-            self._tokenizer = AutoTokenizer.from_pretrained(
-                pretrained_model_name_or_path=self._model_id, revision=self._revision
+            self.__tokenizer = AutoTokenizer.from_pretrained(
+                pretrained_model_name_or_path=self.model_id, revision=self.revision
             )
         except Exception as e:
             raise RuntimeError(f"MLLM 初始化失败：{e}")
@@ -36,8 +35,8 @@ class Moondream:
             str: 返回图像描述
         """
 
-        image = self._model.encode_image(Image.open(fp=image_path))
-        answer = self._model.answer_question(image, self.prompt, self._tokenizer)
+        image = self.__model.encode_image(Image.open(fp=image_path))
+        answer = self.__model.answer_question(image, self.prompt, self.__tokenizer)
 
         return answer
 
