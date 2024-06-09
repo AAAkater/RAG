@@ -6,6 +6,7 @@ import app.metadata.audio as audio
 import app.metadata.document as document
 import app.metadata.image as image
 import app.metadata.video as video
+from app.core.crud import database
 from app.core.log import logger
 from app.model.model import UploadResponse
 from fastapi import APIRouter, File, UploadFile
@@ -15,16 +16,30 @@ router = APIRouter()
 
 @router.post("/uploadImage", response_model=UploadResponse)
 async def upload_image(file: UploadFile) -> UploadResponse:
+    """_summary_
 
+    Args:
+        file (UploadFile): _description_
+
+    Returns:
+        UploadResponse: _description_
+    """
+    # 文件名修改
     image_uuid = str(uuid.uuid4())
     image_extension: str = file.filename.split(".")[-1]  # type: ignore
     new_name: str = f"{image_uuid}.{image_extension}"
 
     try:
-        # 写入metadata/images
+        # 写入metadata/images本地
         path: str = os.path.join(os.path.dirname(image.__file__), new_name)  # type: ignore
         with open(path, "wb") as f:
             f.write(await file.read())
+        # 写入milvus
+        database.insert_image(
+            uuid=image_uuid, new_name=new_name, old_name=file.filename
+        )
+        # print(f"{image_uuid=}")
+        # print(f"{new_name}")
         return UploadResponse(code=0, data="上传成功", message="ok")
     except Exception as e:
         print(e)
@@ -32,15 +47,27 @@ async def upload_image(file: UploadFile) -> UploadResponse:
 
 
 @router.post("/uploadDocument", response_model=UploadResponse)
-async def upload_pdf(file: UploadFile) -> UploadResponse:
-    pdf_uuid = str(uuid.uuid4())
-    pdf_extension: str = file.filename.split(".")[-1]  # type: ignore
-    new_name: str = f"{pdf_uuid}.{pdf_extension}"
+async def upload_document(file: UploadFile) -> UploadResponse:
+    """_summary_
+
+    Args:
+        file (UploadFile): _description_
+
+    Returns:
+        UploadResponse: _description_
+    """
+    document_uuid = str(uuid.uuid4())
+    document_extension: str = file.filename.split(".")[-1]  # type: ignore
+    new_name: str = f"{document_uuid}.{document_extension}"
     try:
         # 写入metadata/document
         path: str = os.path.join(os.path.dirname(document.__file__), new_name)  # type: ignore
         with open(path, "wb") as f:
             f.write(await file.read())
+        # 写入milvus
+        database.insert_document(
+            uuid=document_uuid, new_name=new_name, old_name=file.filename
+        )
         return UploadResponse(code=0, data="上传成功", message="ok")
     except Exception as e:
         print(e)
@@ -49,7 +76,14 @@ async def upload_pdf(file: UploadFile) -> UploadResponse:
 
 @router.post("/uploadAudio", response_model=UploadResponse)
 async def upload_audio(file: UploadFile) -> UploadResponse:
+    """_summary_
 
+    Args:
+        file (UploadFile): _description_
+
+    Returns:
+        UploadResponse: _description_
+    """
     audio_uuid = str(uuid.uuid4())
     audio_extension: str = file.filename.split(".")[-1]  # type: ignore
     new_name: str = f"{audio_uuid}.{audio_extension}"
@@ -59,6 +93,9 @@ async def upload_audio(file: UploadFile) -> UploadResponse:
         content = await file.read()
         with open(path, "wb") as f:
             f.write(content)
+        database.insert_audio(
+            uuid=audio_uuid, new_name=new_name, old_name=file.filename
+        )
         return UploadResponse(code=0, data="上传成功", message="ok")
     except Exception as e:
         print(e)
@@ -67,7 +104,14 @@ async def upload_audio(file: UploadFile) -> UploadResponse:
 
 @router.post("/uploadVideo", response_model=UploadResponse)
 async def upload_Video(file: UploadFile) -> UploadResponse:
+    """_summary_
 
+    Args:
+        file (UploadFile): _description_
+
+    Returns:
+        UploadResponse: _description_
+    """
     video_uuid = str(uuid.uuid4())
     video_extension: str = file.filename.split(".")[-1]  # type: ignore
     new_name: str = f"{video_uuid}.{video_extension}"
