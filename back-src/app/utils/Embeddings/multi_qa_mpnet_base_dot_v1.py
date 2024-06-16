@@ -1,9 +1,10 @@
 from typing import List
 
+from langchain_core.embeddings.embeddings import Embeddings
 from sentence_transformers import SentenceTransformer
 
 
-class Embedding:
+class Embedding(Embeddings):
     _model = None
 
     def __init__(self):
@@ -14,7 +15,7 @@ class Embedding:
     def encode(self, sentence: str):
         return self._model.encode(sentence)
 
-    def embed_document(self, texts: List[str]) -> List[List[float]]:
+    def embed_documents(self, texts: List[str]) -> List[List[float]]:
         return [self._model.encode(t).tolist() for t in texts]
 
     def embed_query(self, text: str) -> List[float]:

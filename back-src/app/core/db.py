@@ -68,26 +68,6 @@ if __name__ == "__main__":
 
     connections.connect()
     new_collection = Collection(name="image")
-    old_collection = Collection(name="images")
-    old_collection.load()
-    # pp(old_collection.query(expr="", output_fields=["id", "desc"], limit=5))
 
-    data = old_collection.query(
-        expr="", output_fields=["id", "desc", "desc_vec"], limit=500
-    )
-    # pp(data)
-
-    pp(len(data))
-    desc_vec = [record["desc_vec"] for record in data]
-    ids = [record["id"] for record in data]
-    desc = [record["desc"] for record in data]
-    metadata = [id + ".jpg" for id in ids]
-    # pp(ids)
-
-    # pp(metadata)
-
-    new_collection.insert(
-        [{"id": ids, "desc": desc, "desc_vec": desc_vec, "metadata": metadata}]
-    )
-
-    pp(len(new_collection.query(expr="", output_fields=["id"], limit=500)))
+    new_collection.load()
+    pp(new_collection.query(expr="", output_fields=["id", "metadata", "desc"], limit=5))

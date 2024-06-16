@@ -1,6 +1,8 @@
+from pprint import pp
 from typing import Any, Dict, List
 
 from app.core.crud import database
+from app.utils.Embeddings.multi_qa_mpnet_base_dot_v1 import Embedding
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains.history_aware_retriever import create_history_aware_retriever
 from langchain.chains.retrieval import create_retrieval_chain
@@ -10,6 +12,7 @@ from langchain.prompts import (
     SystemMessagePromptTemplate,
 )
 from langchain_community.docstore.document import Document
+from langchain_community.vectorstores.milvus import Milvus
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.messages import BaseMessage
 from langchain_core.prompts import MessagesPlaceholder
@@ -33,19 +36,23 @@ class InMemoryHistory(BaseChatMessageHistory, BaseModel):
 
 
 class Retrieval:
-    contextualize_q_system_prompt = """Given a chat history and the latest user question \
-    which might reference context in the chat history, formulate a standalone question \
-    which can be understood without the chat history. Do NOT answer the question, \
-    just reformulate it if needed and otherwise return it as is.\
-    """
+    contextualize_q_system_prompt = (
+        "Given a chat history and the latest user question "
+        "which might reference context in the chat history, "
+        "formulate a standalone question which can be understood "
+        "without the chat history. Do NOT answer the question, "
+        "just reformulate it if needed and otherwise return it as is."
+    )
 
-    qa_system_prompt = """You are an assistant for question-answering tasks. \
-    Use the following pieces of retrieved context to answer the question. \
-    If you don't know the answer, just say that you don't know. \
-    Use three sentences maximum and keep the answer concise.\
-    chat history:\
-    {context}
-    """
+    qa_system_prompt = (
+        "You are an assistant for question-answering tasks. "
+        "Use the following pieces of retrieved context to answer "
+        "the question. If you don't know the answer, say that you "
+        "don't know. Use three sentences maximum and keep the "
+        "answer concise."
+        "\n\n"
+        "{context}"
+    )
 
     def __init__(self, db_retriever) -> None:
         self._llm = ChatOpenAI(temperature=0)
@@ -118,5 +125,27 @@ retrieval = Retrieval(db_retriever=database.as_retriever)
 
 if __name__ == "__main__":
 
-    res = retrieval.invoke("What are the yellow flowers?")
-    print(res)
+    # res = retrieval.invoke("What are the yellow flowers?")
+    # print(res)
+    images_collection = Milvus(
+        embedding_function=Embedding(),
+        collection_name="audio",
+        connection_args={
+            "host": "localhost",
+            "port": "19530",
+        },
+        primary_field="id",
+        text_field="desc",
+        vector_field="desc_vec",
+    )
+    retriever = images_collection.as_retriever(
+        search_type="mmr", search_kwargs={"k": 5}
+    )
+
+    retrieval = Retrieval(retriever)
+    res = retrieval.invoke("How GPS works")
+
+    # pp(res)
+
+    for doc in res["context"]:
+        pp(doc.metadata["metadata"])

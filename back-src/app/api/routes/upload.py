@@ -56,18 +56,13 @@ async def upload_document(file: UploadFile) -> UploadResponse:
     Returns:
         UploadResponse: _description_
     """
-    document_uuid = str(uuid.uuid4())
-    document_extension: str = file.filename.split(".")[-1]  # type: ignore
-    new_name: str = f"{document_uuid}.{document_extension}"
     try:
         # 写入metadata/document
-        path: str = os.path.join(os.path.dirname(document.__file__), new_name)  # type: ignore
+        path: str = os.path.join(os.path.dirname(document.__file__), file.filename)  # type: ignore
         with open(path, "wb") as f:
             f.write(await file.read())
         # 写入milvus
-        database.insert_document(
-            uuid=document_uuid, new_name=new_name, old_name=file.filename
-        )
+        database.insert_document(file_name=file.filename)
         return UploadResponse(code=0, data="上传成功", message="ok")
     except Exception as e:
         print(e)
@@ -84,18 +79,14 @@ async def upload_audio(file: UploadFile) -> UploadResponse:
     Returns:
         UploadResponse: _description_
     """
-    audio_uuid = str(uuid.uuid4())
-    audio_extension: str = file.filename.split(".")[-1]  # type: ignore
-    new_name: str = f"{audio_uuid}.{audio_extension}"
     try:
         # 写入metadata/audio
-        path: str = os.path.join(os.path.dirname(audio.__file__), new_name)  # type: ignore
+        path: str = os.path.join(os.path.dirname(audio.__file__), file.filename)  # type: ignore
         content = await file.read()
         with open(path, "wb") as f:
             f.write(content)
-        database.insert_audio(
-            uuid=audio_uuid, new_name=new_name, old_name=file.filename
-        )
+        # 写入milvus
+        database.insert_audio(file_name=file.filename)
         return UploadResponse(code=0, data="上传成功", message="ok")
     except Exception as e:
         print(e)

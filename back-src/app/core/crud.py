@@ -1,5 +1,6 @@
 import glob
 import os
+import uuid
 from pathlib import Path
 from pprint import pp
 from typing import Any, Literal, Tuple
@@ -51,7 +52,7 @@ class Database:
         """
         res = self.__client.search(
             collection_name=self.collection_names[0],
-            data=self.__embedding_model.embed_document([query]),
+            data=self.__embedding_model.embed_documents([query]),
             output_fields=["id", "desc"],
             limit=5,
         )
@@ -76,7 +77,7 @@ class Database:
         )
         return
 
-    def insert_document(self, uuid: str, new_name: str, old_name: str):
+    def insert_document(self, file_name: str):
         """将文档转换成向量再写入数据库
 
         Args:
@@ -84,40 +85,48 @@ class Database:
             new_name (str): _description_
             old_name (str): _description_
         """
-        path: str = os.path.join(os.path.dirname(document.__file__), new_name)
+        path: str = os.path.join(os.path.dirname(document.__file__), file_name)
         loader = PyPDFLoader(path)
         pages = loader.load_and_split(pdf_splitter)
 
-        embeddings = self.__embedding_model.embed_document(
+        embeddings = self.__embedding_model.embed_documents(
             [page.page_content for page in pages]
         )
-        print(len(embedding))
-        for embedding, Document in zip(embeddings, pages):
+        print(len(embeddings))
+        for embedding, page in zip(embeddings, pages):
             self.__client.insert(
                 collection_name="document",
                 data={
-                    "id": uuid,
-                    "desc": Document.page_content,
+                    "id": str(uuid.uuid4()),
+                    "desc": page.page_content,
                     "desc_vec": embedding,
-                    "metadata": old_name,
+                    "metadata": file_name,
                 },
             )
         return
 
-    def insert_audio(self, uuid: str, new_name: str, old_name: str):
+    def insert_audio(self, file_name: str):
         """将音频转换成向量再写入数据库
 
         Args:
             audio_name (str): _description_
         """
-        path: str = os.path.join(os.path.dirname(audio.__file__), new_name)
-        desc: str = self.__audio_model.answer(path)
-        desc_vec = self.__embedding_model.encode(desc)
+        path: str = os.path.join(os.path.dirname(audio.__file__), file_name)
+        answer: str = self.__audio_model.answer(path)
 
-        self.__client.insert(
-            collection_name="audio",
-            data={"id": uuid, "desc": desc, "desc_vec": desc_vec, "metadata": old_name},
-        )
+        texts = pdf_splitter.split_text(answer)
+        embeddings = self.__embedding_model.embed_documents(texts)
+
+        for text, embedding in zip(texts, embeddings):
+            self.__client.insert(
+                collection_name="audio",
+                data={
+                    "id": str(uuid.uuid4()),
+                    "desc": text,
+                    "desc_vec": embedding,
+                    "metadata": file_name,
+                },
+            )
         return
 
     def insert_video(self, video_name: str):
