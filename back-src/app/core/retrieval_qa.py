@@ -1,8 +1,6 @@
 from pprint import pp
 from typing import Any, Dict, List
 
-from app.core.crud import database
-from app.utils.Embeddings.multi_qa_mpnet_base_dot_v1 import Embedding
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains.history_aware_retriever import create_history_aware_retriever
 from langchain.chains.retrieval import create_retrieval_chain
@@ -20,6 +18,9 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.runnables.base import Runnable
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_openai import ChatOpenAI
+
+from app.core.crud import database
+from app.utils.Embeddings.multi_qa_mpnet_base_dot_v1 import Embedding
 
 
 class InMemoryHistory(BaseChatMessageHistory, BaseModel):
@@ -55,7 +56,9 @@ class Retrieval:
     )
 
     def __init__(self, db_retriever) -> None:
+        # self._llm = ChatOpenAI(temperature=0)
         self._llm = ChatOpenAI(temperature=0)
+
         self.chat_history = {}
 
         # 检索模板
