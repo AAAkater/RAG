@@ -2,7 +2,6 @@ from fastapi import APIRouter, HTTPException, UploadFile, status
 
 from app.model import State404Response, UploadMetadataResponse
 
-version = "v1"
 isDeprecated = False
 
 
@@ -10,10 +9,9 @@ router = APIRouter()
 
 
 @router.post(
-    path=f"/api/{version}" + "/metadata/{knowledge_base_name}",
+    path="/metadata/{knowledge_base_name}",
     status_code=status.HTTP_200_OK,
     response_model=UploadMetadataResponse,
-    tags=["metadata"],
     summary="upload metadata files",
     deprecated=isDeprecated,
 )
@@ -46,3 +44,38 @@ async def upload_metadata(
         msg="ok",
         data={"knowledge_base_name": knowledge_base_name, "files": filenames},
     )
+
+
+@router.put(
+    path="/metadata/{knowledge_base_name}/{metadata_id}",
+    status_code=status.HTTP_200_OK,
+    summary="",
+)
+async def update_metadata(knowledge_base_name: str, metadata_id: str):
+    return
+
+
+@router.get(
+    path="/metadata/{knowledge_base_name}", status_code=status.HTTP_200_OK, summary=""
+)
+async def get_metadata_items(knowledge_base_name: str):
+
+    return
+
+
+@router.get(
+    path="/metadata/{knowledge_base_name}/{metadata_id}",
+    status_code=status.HTTP_200_OK,
+    summary="",
+)
+async def get_single_metadata(knowledge_base_name: str, metadata_id: str):
+    return
+
+
+@router.delete(
+    path="/metadata/{knowledge_base_name}/{metadata_id}",
+    status_code=status.HTTP_200_OK,
+    summary="",
+)
+async def del_metadata(knowledge_base_name: str, metadata_id: str):
+    return

@@ -10,14 +10,30 @@ class State404Response(BaseModel):
 
 
 class UploadMetadataResponse(BaseModel):
-    code: str = Field(default="0", description="Business Code")
-    msg: str = Field(default="ok")
-
     class UploadMetadataItem(BaseModel):
         knowledge_base_name: str = Field(default="")
         files: List[str] = Field(default=[])
 
+    code: str = Field(default="0", description="Business Code")
+    msg: str = Field(default="ok")
     data: UploadMetadataItem | None = Field(default=None)
+
+
+class GetMetadataItemsResponse(BaseModel):
+    class MetadataItems(BaseModel):
+        knowledge_base_name: str
+        metadata: List[str]
+        curPageNum: int
+        hasNext: bool
+        hasPrev: bool
+        numPerPage: 10
+        tasks: Any
+        totalNum: int
+        totalPageNum: int
+
+    code: str = Field(default="0", description="Business Code")
+    msg: str = Field(default="ok")
+    data: MetadataItems
 
 
 if __name__ == "__main__":

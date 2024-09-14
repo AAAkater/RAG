@@ -1,7 +1,6 @@
-from fastapi import FastAPI, Request, status
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI
 
-from app.api.main import api_router
+from app.api import api_router
 
 app = FastAPI()
 
