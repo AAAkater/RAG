@@ -1,39 +1,27 @@
-# rag-front
+# 多模态RAG前端
 
-This template should help get you started developing with Vue 3 in Vite.
+## 1.运行
 
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
-
-```sh
-pnpm install
+```bash
+cd font-src # 切入工作目录
+pnpm install # 下载依赖
+pnpm dev # 运行
 ```
 
-### Compile and Hot-Reload for Development
+## 2.GIT规范
 
-```sh
-pnpm dev
+基于develop分支创建feature/branch-name分支
+
+```bash
+git checkout -b feature/branch-name develop
 ```
 
-### Type-Check, Compile and Minify for Production
+合并自己的功能分支到develop分支
 
-```sh
-pnpm build
+```bash
+git checkout develop #切换到develop分支
+git merge feature/branch-name #合并分支
 ```
 
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-pnpm lint
-```
+!!! 注意
+    请不要对master分支进行任何合并或者提交操作
