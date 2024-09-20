@@ -1,8 +1,10 @@
 {
-  "$schema": "https://json.schemastore.org/prettierrc",
-  "semi": false,
+  "trailingComma": "all",
   "tabWidth": 2,
-  "singleQuote": true,
-  "printWidth": 100,
-  "trailingComma": "none"
+  "semi": false,
+  "singleQuote": false,
+  "singleAttributePerLine": true,
+  "arrowParens": "always",
+  "vueIndentScriptAndStyle": false,
+  "plugins": ["prettier-plugin-organize-imports", "prettier-plugin-tailwindcss"]
 }
