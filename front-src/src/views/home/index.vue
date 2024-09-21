@@ -5,14 +5,9 @@ import {
   UserOutlined,
 } from "@ant-design/icons-vue"
 import { ref, h } from "vue"
-import type { MenuTheme } from "ant-design-vue"
-import { Menu, Layout, Button, Switch, Avatar } from "ant-design-vue"
+import { Menu, Layout, Button, Avatar } from "ant-design-vue"
 import { useRouter } from "vue-router"
-const theme = ref<MenuTheme>("light")
-const changeTheme = (checked: boolean | string | number) => {
-  theme.value = checked ? "dark" : "light"
-}
-const selectedKeys = ref<string[]>(["2"])
+const selectedKeys = ref<string[]>([""])
 
 const router = useRouter()
 
@@ -22,26 +17,28 @@ const startOnclick = () => {
 </script>
 
 <template>
-  <div class="flex h-screen flex-col">
-    <Layout.Header class="">
+  <Layout class="h-screen">
+    <Layout.Header
+      class="flex"
+      style="padding: 0"
+    >
+      <div class="ml-4 p-2">
+        <img
+          src="@/assets/icons/logo.svg"
+          alt=""
+          class="h-full w-auto"
+        />
+      </div>
       <Menu
         v-model:selectedKeys="selectedKeys"
-        :theme="theme"
+        theme="dark"
         mode="horizontal"
         :style="{ lineHeight: '64px' }"
-        class="flex justify-end"
+        class="mx-0 flex w-full justify-end"
       >
         <Menu.Item key="1">nav 1</Menu.Item>
         <Menu.Item key="2">nav 2</Menu.Item>
         <Menu.Item key="3">nav 3</Menu.Item>
-        <Menu.Item key="4">
-          <Switch
-            :checked="theme === 'dark'"
-            checked-children="Dark"
-            un-checked-children="Light"
-            @change="changeTheme"
-          />
-        </Menu.Item>
         <Menu.Item key="5">
           <GithubOutlined />
         </Menu.Item>
@@ -54,23 +51,32 @@ const startOnclick = () => {
         </Menu.Item>
       </Menu>
     </Layout.Header>
-    <Layout.Content :class="['flex items-center justify-center', 'flex-grow']">
-      <div class="">
-        <div class="mb-6 font-mono text-6xl">多模态知识图谱RAG</div>
-        <div class="flex justify-center">
-          <Button
-            type="primary"
-            :icon="h(RightOutlined)"
-            size="large"
-            shape="round"
-            @click="startOnclick"
-          >
-            快速上手
-          </Button>
+    <Layout.Content class="flex h-full items-center justify-center outline">
+      <div class="flex h-[400px]">
+        <img
+          src="@/assets/icons/logo.svg"
+          alt=""
+          class="h-full w-auto"
+        />
+        <div class="flex items-center justify-center px-20">
+          <div>
+            <div class="mb-16 font-mono text-6xl">多模态知识图谱RAG</div>
+            <div class="flex justify-center">
+              <Button
+                type="primary"
+                :icon="h(RightOutlined)"
+                size="large"
+                shape="round"
+                @click="startOnclick"
+              >
+                快速上手
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </Layout.Content>
-  </div>
+  </Layout>
 </template>
 
 <style scoped></style>
