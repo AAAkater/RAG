@@ -19,7 +19,9 @@ import {
 import { useUserStore } from "@/stores"
 import { type FormState } from "@/types"
 import captchaImg from "@/assets/image/captcha_example.jpeg"
+import { useRouter } from "vue-router"
 const userStore = useUserStore()
+const router = useRouter()
 // 表单数据
 const formState = reactive<FormState>({
   username: "",
@@ -70,6 +72,7 @@ const submit = () => {
   // 更新user
   userStore.updateInfo(formState)
   message.success("登录成功")
+  router.push("/dashboard")
 }
 </script>
 
