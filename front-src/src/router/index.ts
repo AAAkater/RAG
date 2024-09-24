@@ -7,6 +7,33 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/dashboard",
     component: () => import("@/views/dashboard/index.vue"),
+    redirect: "/dashboard/home",
+    children: [
+      {
+        path: "home",
+        meta: {
+          title: "主页",
+          noAuth: true,
+        },
+        component: () => import("@/views/dashboard/home/index.vue"),
+      },
+      {
+        path: "knowledge-base",
+        meta: {
+          title: "知识库",
+          noAuth: true,
+        },
+        component: () => import("@/views/dashboard/knowledge_base/index.vue"),
+      },
+      {
+        path: "dialog",
+        meta: {
+          title: "对话",
+          noAuth: true,
+        },
+        component: () => import("@/views/dashboard/dialog/index.vue"),
+      },
+    ],
   },
   {
     path: "/login",

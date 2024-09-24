@@ -1,16 +1,47 @@
 <script lang="ts" setup>
-import { ref } from "vue"
+import { ref, h } from "vue"
 import {
-  UserOutlined,
-  VideoCameraOutlined,
-  UploadOutlined,
   MenuUnfoldOutlined,
   MenuFoldOutlined,
+  AppstoreOutlined,
+  CommentOutlined,
+  HomeOutlined,
 } from "@ant-design/icons-vue"
 import MenuLogo from "./components/MenuLogo.vue"
 import { Layout, Menu } from "ant-design-vue"
-const selectedKeys = ref<string[]>(["1"])
+import { useRouter } from "vue-router"
+const selectedKeys = ref<string[]>(["home"])
 const collapsed = ref<boolean>(false)
+const router = useRouter()
+const items = ref([
+  {
+    key: "home",
+    icon: () => h(HomeOutlined),
+    label: "首页",
+    title: "回到起点",
+    click: () => {
+      router.push("/dashboard/home")
+    },
+  },
+  {
+    key: "base",
+    icon: () => h(AppstoreOutlined),
+    label: "知识库",
+    title: "管理你的私人知识库",
+    click: () => {
+      router.push("/dashboard/knowledge-base")
+    },
+  },
+  {
+    key: "dialog",
+    icon: () => h(CommentOutlined),
+    label: "对话",
+    title: "在这里查看所有会话记录",
+    click: () => {
+      router.push("/dashboard/dialog")
+    },
+  },
+])
 </script>
 
 <template>
@@ -27,40 +58,30 @@ const collapsed = ref<boolean>(false)
         theme="dark"
         mode="inline"
       >
-        <Menu.Item key="1">
-          <user-outlined />
-          <span>nav 1</span>
-        </Menu.Item>
-        <Menu.Item key="2">
-          <video-camera-outlined />
-          <span>nav 2</span>
-        </Menu.Item>
-        <Menu.Item key="3">
-          <upload-outlined />
-          <span>nav 3</span>
+        <Menu.Item
+          v-for="item of items"
+          :key="item.key"
+          :icon="item.icon"
+          :title="item.title"
+          @click="item.click"
+        >
+          {{ item.label }}
         </Menu.Item>
       </Menu>
     </Layout.Sider>
     <Layout>
       <Layout.Header style="background: #fff">
-        <menu-unfold-outlined
+        <MenuUnfoldOutlined
           v-if="collapsed"
           @click="() => (collapsed = !collapsed)"
         />
-        <menu-fold-outlined
+        <MenuFoldOutlined
           v-else
           @click="() => (collapsed = !collapsed)"
         />
       </Layout.Header>
-      <Layout.Content
-        :style="{
-          margin: '24px 16px',
-          padding: '24px',
-          background: '#fff',
-          minHeight: '280px',
-        }"
-      >
-        Content
+      <Layout.Content>
+        <RouterView />
       </Layout.Content>
     </Layout>
   </Layout>

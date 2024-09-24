@@ -1,7 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div>对话</div>
+  <div>home</div>
 </template>
 
-<style scoped></style>
+<style lang="css" scoped></style>
