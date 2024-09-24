@@ -5,7 +5,7 @@ interface Meta {
 }
 
 export interface AssistantContextItem {
-  from: 'assistant'
+  from: "assistant"
   data: string
   metadata: Meta[]
   success: boolean
@@ -13,8 +13,15 @@ export interface AssistantContextItem {
 }
 
 export interface UserContextItem {
-  from: 'user'
+  from: "user"
   data: string
 }
 
 export type ContextItem = AssistantContextItem | UserContextItem
+
+export interface FormState {
+  username: string
+  password: string
+  captcha?: string
+  remember: boolean
+}
