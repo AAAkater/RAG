@@ -1,47 +1,10 @@
 <script lang="ts" setup>
-import { ref, h } from "vue"
-import {
-  MenuUnfoldOutlined,
-  MenuFoldOutlined,
-  AppstoreOutlined,
-  CommentOutlined,
-  HomeOutlined,
-} from "@ant-design/icons-vue"
+import { ref } from "vue"
+import { MenuUnfoldOutlined, MenuFoldOutlined } from "@ant-design/icons-vue"
 import MenuLogo from "./components/MenuLogo.vue"
-import { Layout, Menu } from "ant-design-vue"
-import { useRouter } from "vue-router"
-const selectedKeys = ref<string[]>(["home"])
-const collapsed = ref<boolean>(false)
-const router = useRouter()
-const items = ref([
-  {
-    key: "home",
-    icon: () => h(HomeOutlined),
-    label: "首页",
-    title: "回到起点",
-    click: () => {
-      router.push("/dashboard/home")
-    },
-  },
-  {
-    key: "base",
-    icon: () => h(AppstoreOutlined),
-    label: "知识库",
-    title: "管理你的私人知识库",
-    click: () => {
-      router.push("/dashboard/knowledge-base")
-    },
-  },
-  {
-    key: "dialog",
-    icon: () => h(CommentOutlined),
-    label: "对话",
-    title: "在这里查看所有会话记录",
-    click: () => {
-      router.push("/dashboard/dialog")
-    },
-  },
-])
+import SideMenu from "./components/SideMenu.vue"
+import { Layout } from "ant-design-vue"
+const collapsed = ref<boolean>(true)
 </script>
 
 <template>
@@ -53,21 +16,7 @@ const items = ref([
       class="h-screen"
     >
       <MenuLogo :collapsed="collapsed" />
-      <Menu
-        v-model:selectedKeys="selectedKeys"
-        theme="dark"
-        mode="inline"
-      >
-        <Menu.Item
-          v-for="item of items"
-          :key="item.key"
-          :icon="item.icon"
-          :title="item.title"
-          @click="item.click"
-        >
-          {{ item.label }}
-        </Menu.Item>
-      </Menu>
+      <SideMenu />
     </Layout.Sider>
     <Layout>
       <Layout.Header style="background: #fff">

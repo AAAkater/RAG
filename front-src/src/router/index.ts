@@ -39,10 +39,6 @@ const routes: RouteRecordRaw[] = [
     path: "/login",
     component: () => import("@/views/login/index.vue"),
   },
-  {
-    path: "/dialog",
-    component: () => import("@/views/dialog/index.vue"),
-  },
 ]
 
 const router = createRouter({
