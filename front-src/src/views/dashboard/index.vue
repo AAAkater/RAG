@@ -1,9 +1,13 @@
 <script lang="ts" setup>
 import { ref } from "vue"
-import { MenuUnfoldOutlined, MenuFoldOutlined } from "@ant-design/icons-vue"
+import {
+  MenuUnfoldOutlined,
+  MenuFoldOutlined,
+  UserOutlined,
+} from "@ant-design/icons-vue"
 import MenuLogo from "./components/MenuLogo.vue"
 import SideMenu from "./components/SideMenu.vue"
-import { Layout } from "ant-design-vue"
+import { Layout, Avatar } from "ant-design-vue"
 const collapsed = ref<boolean>(true)
 </script>
 
@@ -19,7 +23,10 @@ const collapsed = ref<boolean>(true)
       <SideMenu />
     </Layout.Sider>
     <Layout>
-      <Layout.Header style="background: #fff">
+      <Layout.Header
+        style="background: #fff"
+        class="flex items-center justify-between"
+      >
         <MenuUnfoldOutlined
           v-if="collapsed"
           @click="() => (collapsed = !collapsed)"
@@ -28,6 +35,9 @@ const collapsed = ref<boolean>(true)
           v-else
           @click="() => (collapsed = !collapsed)"
         />
+        <Avatar :size="32">
+          <template #icon><UserOutlined /></template>
+        </Avatar>
       </Layout.Header>
       <Layout.Content>
         <RouterView />
