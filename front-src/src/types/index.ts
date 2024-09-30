@@ -25,3 +25,9 @@ export interface FormState {
   captcha?: string
   remember: boolean
 }
+
+export interface CaptchaItem {
+  id: string
+  code: string
+  base64?: string
+}
