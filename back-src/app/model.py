@@ -9,31 +9,52 @@ class State404Response(BaseModel):
     data: Any = None
 
 
+class UploadMetadataItem(BaseModel):
+    knowledge_base_name: str = Field(default="")
+    files: List[str] = Field(default=[])
+
+
 class UploadMetadataResponse(BaseModel):
-    class UploadMetadataItem(BaseModel):
-        knowledge_base_name: str = Field(default="")
-        files: List[str] = Field(default=[])
 
     code: str = Field(default="0", description="Business Code")
     msg: str = Field(default="ok")
     data: UploadMetadataItem | None = Field(default=None)
 
 
+class MetadataItem(BaseModel):
+    knowledge_base_name: str
+    metadata: List[str]
+    curPageNum: int
+    hasNext: bool
+    hasPrev: bool
+    numPerPage: int
+    tasks: Any
+    totalNum: int
+    totalPageNum: int
+
+
 class GetMetadataItemsResponse(BaseModel):
-    class MetadataItems(BaseModel):
-        knowledge_base_name: str
-        metadata: List[str]
-        curPageNum: int
-        hasNext: bool
-        hasPrev: bool
-        numPerPage: 10
-        tasks: Any
-        totalNum: int
-        totalPageNum: int
 
     code: str = Field(default="0", description="Business Code")
     msg: str = Field(default="ok")
-    data: MetadataItems
+    data: MetadataItem
+
+
+class CaptchaItem(BaseModel):
+    captchaId: str
+    captchaImgBase64: str
+
+
+class GetCaptchaResponse(BaseModel):
+    code: str
+    msg: str
+    data: CaptchaItem
+
+
+class VerifyGetCaptchaResponse(BaseModel):
+    code: str
+    msg: str
+    data: Any
 
 
 if __name__ == "__main__":
