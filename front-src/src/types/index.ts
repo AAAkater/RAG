@@ -22,12 +22,12 @@ export type ContextItem = AssistantContextItem | UserContextItem
 export interface FormState {
   username: string
   password: string
-  captcha?: string
+  captchaCode?: string
   remember: boolean
 }
 
 export interface CaptchaItem {
   id: string
   code: string
-  base64?: string
+  base64: string
 }

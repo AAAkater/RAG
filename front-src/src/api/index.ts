@@ -1,2 +1,2 @@
+export * from "./modules/captcha"
 export * from "./modules/user"
-export * from "./modules/verify"
