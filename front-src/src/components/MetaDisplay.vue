@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { apiBase } from "@/constants"
-import openNotification from "@/util/openNotification"
+import openNotification from "@/utils/openNotification"
 import axios from "axios"
 
 const downloadFile = async (url: string, type: string) => {

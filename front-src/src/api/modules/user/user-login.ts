@@ -1,4 +1,4 @@
-import { request } from "@/util/request"
+import { request } from "@/utils/request"
 
 const URL = "/session"
 export const userLogin = () => {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import Left from "./components/LoginLogo.vue"
-import Right from "./components/LoginForm.vue"
+import LoginLogo from "./components/LoginLogo.vue"
+import LoginForm from "./components/LoginForm.vue"
 </script>
 
 <template>
@@ -12,8 +12,8 @@ import Right from "./components/LoginForm.vue"
     ]"
   >
     <div :class="['h-1/2 w-1/2 min-w-80', 'flex shadow-2xl']">
-      <Left />
-      <Right />
+      <LoginLogo />
+      <LoginForm />
     </div>
   </div>
 </template>

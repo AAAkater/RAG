@@ -29,7 +29,7 @@ const formState = reactive<FormState>({
   captcha: "",
   remember: userStore.remember,
 })
-
+// 填写已有的信息
 if (userStore.remember) {
   formState.username = userStore.username
   formState.password = userStore.password
