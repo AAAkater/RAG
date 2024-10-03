@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { reactive, ref } from "vue"
+import { onMounted, reactive, ref } from "vue"
 import {
   UserOutlined,
   LockOutlined,
@@ -18,29 +18,48 @@ import {
 } from "ant-design-vue"
 import { useUserStore } from "@/stores"
 import { type FormState } from "@/types"
-import captchaImg from "@/assets/image/captcha_example.jpeg"
 import { useRouter } from "vue-router"
+import { getCaptcha, refreshCaptcha } from "@/api"
+import type { captchaItem } from "@/api/types/response"
 const userStore = useUserStore()
 const router = useRouter()
+const captcha = ref<captchaItem>({
+  captchaId: "",
+  captchaCode: "",
+  captchaImgBase64: "",
+})
 // 表单数据
 const formState = reactive<FormState>({
   username: "",
   password: "",
-  captcha: "",
+  captchaCode: "",
   remember: userStore.remember,
 })
-// 填写已有的信息
-if (userStore.remember) {
-  formState.username = userStore.username
-  formState.password = userStore.password
+
+// 获取验证码
+const getCaptchaItem = async () => {
+  const resp = await getCaptcha()
+
+  if (resp.status !== 200 || resp.data.code !== "0") {
+    return
+  }
+  console.log("获取验证码")
+  const { captchaId, captchaImgBase64 } = resp.data.data!
+  captcha.value.captchaId = captchaId
+  captcha.value.captchaImgBase64 = captchaImgBase64
 }
 
-const captchaSrc = ref("")
-const getCaptcha = () => {
-  // message.success("更新验证码")
-  captchaSrc.value = captchaImg
+// 点击验证码图片刷新验证码
+const onCaptchaClick = async () => {
+  const resp = await refreshCaptcha(captcha.value.captchaId)
+
+  if (resp.status !== 200 || resp.data.code !== "0") {
+    return
+  }
+  const { captchaId, captchaImgBase64 } = resp.data.data!
+  captcha.value.captchaId = captchaId
+  captcha.value.captchaImgBase64 = captchaImgBase64
 }
-getCaptcha()
 // 校验规则
 const rules: Record<string, Rule[]> = {
   username: [
@@ -74,6 +93,15 @@ const submit = () => {
   message.success("登录成功")
   router.push("/dashboard")
 }
+
+onMounted(() => {
+  getCaptchaItem()
+  // 填写已有的信息
+  if (userStore.remember) {
+    formState.username = userStore.username
+    formState.password = userStore.password
+  }
+})
 </script>
 
 <template>
@@ -112,7 +140,7 @@ const submit = () => {
       <Form.Item name="captcha">
         <Space>
           <Input
-            v-model:value="formState.captcha"
+            v-model:value="formState.captchaCode"
             placeholder="验证码"
             :controls="false"
           >
@@ -121,9 +149,10 @@ const submit = () => {
             </template>
           </Input>
           <Image
-            :src="captchaSrc"
-            @click="getCaptcha"
+            :src="`data:image/png;base64,${captcha.captchaImgBase64}`"
+            @click="onCaptchaClick"
             :preview="false"
+            fallback=""
           />
         </Space>
       </Form.Item>
