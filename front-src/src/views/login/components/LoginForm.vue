@@ -33,7 +33,7 @@ const formState = reactive<FormState>({
   username: "",
   password: "",
   captchaCode: "",
-  remember: userStore.remember,
+  remember: userStore.is_remember,
 })
 
 // 获取验证码
@@ -97,7 +97,7 @@ const submit = () => {
 onMounted(() => {
   getCaptchaItem()
   // 填写已有的信息
-  if (userStore.remember) {
+  if (userStore.is_remember) {
     formState.username = userStore.username
     formState.password = userStore.password
   }
