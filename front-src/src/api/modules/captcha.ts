@@ -11,6 +11,8 @@ export const refreshCaptcha = (
   return request.put(`${baseApiUrl}/captcha/${oldCaptchaId}`)
 }
 
-export const verifyCaptcha = (captcha: CaptchaItem) => {
+export const verifyCaptcha = (
+  captcha: CaptchaItem,
+): AxiosPromise<ApiResponse> => {
   return request.post(`${baseApiUrl}/captcha/${captcha.id}/${captcha.code}`)
 }
