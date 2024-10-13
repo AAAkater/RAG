@@ -1,9 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, HTTPException, status
-from fastapi.responses import RedirectResponse
-
-from app.model import CaptchaItem, GetCaptchaResponse, VerifyGetCaptchaResponse
+from app.model import CaptchaItem, ResponseBase
 from app.utils.captcha_func import (
     generate_captcha_code,
     generate_captcha_img,
@@ -11,6 +8,8 @@ from app.utils.captcha_func import (
 )
 from app.utils.log import logger
 from app.utils.redis_api import redis_client
+from fastapi import APIRouter, HTTPException, status
+from fastapi.responses import RedirectResponse
 
 router = APIRouter()
 
@@ -30,14 +29,12 @@ def init_captcha():
 @router.get(
     path="/captcha",
     status_code=status.HTTP_200_OK,
-    response_model=GetCaptchaResponse,
+    response_model=ResponseBase[CaptchaItem],
     summary="",
 )
-async def get_captcha() -> GetCaptchaResponse:
+async def get_captcha() -> ResponseBase[CaptchaItem]:
     id, code, img_base64 = init_captcha()
-    return GetCaptchaResponse(
-        code="0",
-        msg="ok",
+    return ResponseBase[CaptchaItem](
         data=CaptchaItem(captchaId=id, captchaImgBase64=img_base64),
     )
 
@@ -45,12 +42,9 @@ async def get_captcha() -> GetCaptchaResponse:
 @router.post(
     path="/captcha/{captcha_id}/{captcha_code}",
     status_code=status.HTTP_200_OK,
-    response_model=VerifyGetCaptchaResponse,
+    response_model=ResponseBase,
 )
-async def verify_captcha(
-    captcha_id: str, captcha_code: str
-) -> VerifyGetCaptchaResponse:
-
+async def verify_captcha(captcha_id: str, captcha_code: str):
     code = redis_client.get(name=captcha_id)
     if code is None:
         raise HTTPException(
@@ -58,25 +52,23 @@ async def verify_captcha(
         )
     logger.info(f"{code=}")
     if code == captcha_code:
-        return VerifyGetCaptchaResponse(code="0", msg="ok", data=None)
+        return ResponseBase()
     else:
-        return VerifyGetCaptchaResponse(code="1", msg="验证码错误", data=None)
+        return ResponseBase(code="1", msg="验证码错误", data=None)
 
 
 @router.put(
     path="/captcha/{old_captcha_id}",
     status_code=status.HTTP_200_OK,
-    response_model=GetCaptchaResponse,
+    response_model=ResponseBase[CaptchaItem],
 )
-async def refresh_captcha(old_captcha_id: str):
+async def refresh_captcha(old_captcha_id: str) -> ResponseBase[CaptchaItem]:
 
-    # *删除该验证码
+    # 删除该验证码
     redis_client.delete(old_captcha_id)
     logger.info(f"{old_captcha_id=}")
 
     id, code, img_base64 = init_captcha()
-    return GetCaptchaResponse(
-        code="0",
-        msg="ok",
+    return ResponseBase[CaptchaItem](
         data=CaptchaItem(captchaId=id, captchaImgBase64=img_base64),
     )

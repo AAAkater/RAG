@@ -1,14 +1,12 @@
-from functools import lru_cache
-
 from pydantic import MySQLDsn, computed_field
 from pydantic_core import MultiHostUrl
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
 
-    class Config:
-        env_file = "../../.env"
+    # class Config:
+    #     env_file = ""
 
     # MYSQL
     MYSQL_USER: str
@@ -24,6 +22,7 @@ class Settings(BaseSettings):
             scheme="mysql+pymysql",
             username=self.MYSQL_USER,
             password=self.MYSQL_PASSWORD,
+            port=self.MYSQL_PROT,
             host=self.MYSQL_SERVER,
             path=self.MYSQL_DB,
         )
@@ -31,14 +30,11 @@ class Settings(BaseSettings):
     # TODO: MILVUS settings
 
 
-@lru_cache
-def get_settings():
-    return Settings()
+settings = Settings()
 
 
 if __name__ == "__main__":
 
-    setting = get_settings()
-    url = setting.SQLALCHEMY_DATABASE_URI
+    url = settings.SQLALCHEMY_DATABASE_URI
 
     print(url)

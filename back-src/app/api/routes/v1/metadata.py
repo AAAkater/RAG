@@ -1,6 +1,5 @@
+from app.model import ResponseBase, UploadMetadataItem
 from fastapi import APIRouter, HTTPException, UploadFile, status
-
-from app.model import State404Response, UploadMetadataResponse
 
 isDeprecated = False
 
@@ -11,22 +10,16 @@ router = APIRouter()
 @router.post(
     path="/metadata/{knowledge_base_name}",
     status_code=status.HTTP_200_OK,
-    response_model=UploadMetadataResponse,
+    response_model=ResponseBase[UploadMetadataItem],
     summary="upload metadata files",
     deprecated=isDeprecated,
 )
-async def upload_metadata(
-    knowledge_base_name: str, files: list[UploadFile]
-) -> UploadMetadataResponse:
+async def upload_metadata(knowledge_base_name: str, files: list[UploadFile]):
     # Verify that the knowledge base exists
     if knowledge_base_name not in ["vue", "react"]:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=State404Response(
-                code="0",
-                msg=f"The knowledge base does not exist:{knowledge_base_name}",
-                data=None,
-            ).model_dump(),
+            detail=f"The knowledge base does not exist:{knowledge_base_name}",
         )
 
     filenames = []
@@ -39,10 +32,12 @@ async def upload_metadata(
         except Exception as e:
             print(e)
         filenames.append(file.filename)
-    return UploadMetadataResponse(
+    return ResponseBase[UploadMetadataItem](
         code="0",
         msg="ok",
-        data={"knowledge_base_name": knowledge_base_name, "files": filenames},
+        data=UploadMetadataItem(
+            knowledge_base_name=knowledge_base_name, files=filenames
+        ),
     )
 
 
