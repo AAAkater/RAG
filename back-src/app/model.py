@@ -3,10 +3,9 @@ from typing import Any, Dict, List
 from pydantic import BaseModel, Field
 
 
-class State404Response(BaseModel):
+class ResponseBase(BaseModel):
     code: str = Field(default="0", description="Business Code")
-    msg: str = Field(default="Resource does not exist")
-    data: Any = None
+    msg: str = Field(default="ok")
 
 
 class UploadMetadataItem(BaseModel):
@@ -14,10 +13,7 @@ class UploadMetadataItem(BaseModel):
     files: List[str] = Field(default=[])
 
 
-class UploadMetadataResponse(BaseModel):
-
-    code: str = Field(default="0", description="Business Code")
-    msg: str = Field(default="ok")
+class UploadMetadataResponse(ResponseBase):
     data: UploadMetadataItem | None = Field(default=None)
 
 
@@ -33,10 +29,7 @@ class MetadataItem(BaseModel):
     totalPageNum: int
 
 
-class GetMetadataItemsResponse(BaseModel):
-
-    code: str = Field(default="0", description="Business Code")
-    msg: str = Field(default="ok")
+class GetMetadataItemsResponse(ResponseBase):
     data: MetadataItem
 
 
@@ -45,22 +38,21 @@ class CaptchaItem(BaseModel):
     captchaImgBase64: str
 
 
-class GetCaptchaResponse(BaseModel):
-    code: str
-    msg: str
+class GetCaptchaResponse(ResponseBase):
     data: CaptchaItem
 
 
-class VerifyGetCaptchaResponse(BaseModel):
-    code: str
-    msg: str
+class VerifyGetCaptchaResponse(ResponseBase):
     data: Any
 
 
+# class UserBody(BaseModel):
+
+
 if __name__ == "__main__":
-    data = State404Response(
+    data = UploadMetadataResponse(
         code="0",
         msg=f"The knowledge base does not exist:",
-        data=None,
+        data=UploadMetadataItem(knowledge_base_name="hello", files=["ddd.png"]),
     ).model_dump_json()
     print(data)
