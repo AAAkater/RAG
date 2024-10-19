@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { onMounted, reactive, ref } from "vue"
+import { reactive, h, toRaw, ref } from "vue"
 import {
   UserOutlined,
   LockOutlined,
@@ -7,178 +7,190 @@ import {
 } from "@ant-design/icons-vue"
 import { type Rule } from "ant-design-vue/es/form"
 import {
-  message,
   Form,
   Input,
-  Space,
   Image,
   Flex,
   Checkbox,
   Button,
+  Space,
 } from "ant-design-vue"
 import { useUserStore } from "@/stores"
 import { type FormState } from "@/types"
 import { useRouter } from "vue-router"
-import { getCaptcha, refreshCaptcha } from "@/api"
-import type { captchaItem } from "@/api/types/response"
+import { refreshCaptcha } from "@/api"
 const userStore = useUserStore()
+const useForm = Form.useForm
 const router = useRouter()
-const captcha = ref<captchaItem>({
-  captchaId: "",
-  captchaCode: "",
-  captchaImgBase64: "",
+const captcha = ref({
+  id: "",
+  base64: "",
 })
 // 表单数据
-const formState = reactive<FormState>({
-  username: "",
-  password: "",
-  captchaCode: "",
-  remember: userStore.is_remember,
+const modelRef = reactive<FormState>({
+  username: userStore.username,
+  password: userStore.password,
+  is_remember: false,
+  captcha_code: "",
 })
 
-// 获取验证码
-const getCaptchaItem = async () => {
-  const resp = await getCaptcha()
-
-  if (resp.status !== 200 || resp.data.code !== "0") {
-    return
-  }
-  console.log("获取验证码")
-  const { captchaId, captchaImgBase64 } = resp.data.data!
-  captcha.value.captchaId = captchaId
-  captcha.value.captchaImgBase64 = captchaImgBase64
-}
-
-// 点击验证码图片刷新验证码
-const onCaptchaClick = async () => {
-  const resp = await refreshCaptcha(captcha.value.captchaId)
-
-  if (resp.status !== 200 || resp.data.code !== "0") {
-    return
-  }
-  const { captchaId, captchaImgBase64 } = resp.data.data!
-  captcha.value.captchaId = captchaId
-  captcha.value.captchaImgBase64 = captchaImgBase64
-}
 // 校验规则
-const rules: Record<string, Rule[]> = {
+const rulesRef = reactive<Record<string, Rule[]>>({
   username: [
     {
       required: true,
-      message: "请输入账号",
+      message: "请输入用户名",
+      trigger: ["blur", "change"],
+    },
+    {
+      pattern: /^[A-Za-z]{3,8}$/,
+      message: "账号必须为3到8位字符",
+      trigger: ["blur", "change"],
     },
   ],
   password: [
     {
       required: true,
       message: "请输入密码",
+      trigger: ["blur", "change"],
     },
   ],
-}
-
-// 验证成功
-const onFinish = (values: FormState) => {
-  // message.loading("登录中", 0)
-
-  console.log("Success:", values)
-}
-// 验证失败
-// const onFinishFailed = (errorInfo: any) => {
-//   console.log("Failed:", errorInfo)
-// }
-
-const submit = () => {
-  // 更新user
-  userStore.updateInfo(formState)
-  message.success("登录成功")
-  router.push("/dashboard")
-}
-
-onMounted(() => {
-  getCaptchaItem()
-  // 填写已有的信息
-  if (userStore.is_remember) {
-    formState.username = userStore.username
-    formState.password = userStore.password
-  }
+  captcha_code: [
+    { required: true, message: "请输入验证码", trigger: ["blur", "change"] },
+  ],
 })
+
+const { resetFields, validate, validateInfos } = useForm(modelRef, rulesRef)
+
+// 获取验证码
+// const getCaptchaItem = async () => {
+//   const resp = await getCaptcha()
+
+//   if (resp.status !== 200 || resp.data.code !== "0") {
+//     return
+//   }
+//   // console.log("获取验证码")
+//   const { captchaId, captchaImgBase64 } = resp.data.data!
+//   modelRef.captcha.id = captchaId
+//   modelRef.captcha.base64 = captchaImgBase64
+// }
+// getCaptchaItem()
+
+// 点击验证码图片刷新验证码
+const onCaptchaClick = async () => {
+  const resp = await refreshCaptcha(captcha.value.id)
+
+  if (resp.status !== 200 || resp.data.code !== "0") {
+    return
+  }
+  const { captchaId, captchaImgBase64 } = resp.data.data!
+  captcha.value.id = captchaId
+  captcha.value.base64 = captchaImgBase64
+}
+
+const onSubmit = async () => {
+  validate()
+    .then(() => {
+      console.log(toRaw(modelRef))
+    })
+    .catch((err) => {
+      console.log("error", err)
+    })
+  // console.log("校验ok")
+
+  // try {
+  //   const resp = await userLogin({
+  //     username: modelRef.username,
+  //     password: modelRef.password,
+  //     captchaId: modelRef.captcha.id,
+  //     captchaCode: modelRef.captcha.code,
+  //   })
+
+  //   if (resp.status !== 200) {
+  //     throw new Error("登录失败")
+  //   }
+
+  //   // if (resp.status === 404) {
+  //   //   throw new Error("登录失败")
+  //   // }
+  //   // 存储token
+  //   userStore.updateToken(
+  //     resp.data.data!.access_token,
+  //     resp.data.data!.refresh_token,
+  //   )
+  //   // 更新user
+  //   userStore.updateInfo(modelRef)
+  //   message.success("登录成功")
+  //   router.push("/dashboard")
+  // } catch (err) {
+  //   message.error()
+  //   console.log(err)
+  // }
+}
 </script>
 
 <template>
   <div class="flex h-full w-1/2 items-center justify-center max-sm:w-full">
     <Form
-      :model="formState"
       name="basic"
       :wrapper-col="{ span: 24 }"
       autocomplete="off"
-      @finish="onFinish"
-      :rules="rules"
     >
       <!-- 登录框 -->
-      <Form.Item name="username">
+      <Form.Item v-bind="validateInfos.username">
         <Input
-          v-model:value="formState.username"
+          v-model:value="modelRef.username"
           placeholder="账号"
-        >
-          <template #prefix>
-            <UserOutlined style="color: rgba(0, 0, 0, 0.25)" />
-          </template>
-        </Input>
+          :prefix="h(UserOutlined)"
+        />
       </Form.Item>
       <!-- 密码框 -->
-      <Form.Item name="password">
+      <Form.Item v-bind="validateInfos.password">
         <Input.Password
-          v-model:value="formState.password"
+          v-model:value="modelRef.password"
           placeholder="密码"
-        >
-          <template #prefix>
-            <LockOutlined style="color: rgba(0, 0, 0, 0.25)" />
-          </template>
-        </Input.Password>
+          :prefix="h(LockOutlined)"
+        />
       </Form.Item>
       <!-- 验证码 -->
-      <Form.Item name="captcha">
-        <Space>
+      <Space>
+        <Form.Item v-bind="validateInfos.captcha_code">
           <Input
-            v-model:value="formState.captchaCode"
+            v-model:value="modelRef.captcha_code"
             placeholder="验证码"
             :controls="false"
-          >
-            <template #prefix>
-              <SafetyCertificateOutlined style="color: rgba(0, 0, 0, 0.25)" />
-            </template>
-          </Input>
+            :prefix="h(SafetyCertificateOutlined)"
+          />
+        </Form.Item>
+        <Form.Item>
           <Image
-            :src="`data:image/png;base64,${captcha.captchaImgBase64}`"
+            :src="`data:image/png;base64,${captcha.base64}`"
             @click="onCaptchaClick"
             :preview="false"
             fallback=""
           />
-        </Space>
-      </Form.Item>
+        </Form.Item>
+      </Space>
       <!-- 选项 -->
-      <Form.Item name="remember">
-        <Flex
-          justify="space-between"
-          align="center"
-        >
+      <Form.Item>
+        <div class="flex justify-between">
           <div>
-            <Checkbox v-model:checked="formState.remember"> 记住我 </Checkbox>
+            <Checkbox v-model:checked="modelRef.is_remember"> 记住我 </Checkbox>
           </div>
           <Button
             type="primary"
             html-type="submit"
-            @click="submit"
+            @click="onSubmit"
             >登录
           </Button>
-        </Flex>
+        </div>
       </Form.Item>
       <!-- 注册与找回 -->
       <Form.Item>
-        <Flex justify="space-between">
+        <div class="flex justify-between">
           <a href="">点击注册</a>
           <a href="">忘记密码?</a>
-        </Flex>
+        </div>
       </Form.Item>
     </Form>
   </div>

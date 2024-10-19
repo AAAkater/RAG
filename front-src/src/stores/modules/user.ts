@@ -6,13 +6,13 @@ export const useUserStore = defineStore(
   () => {
     const access_token = ref("")
     const refresh_token = ref<string>("")
-    const password = ref("")
-    const username = ref("")
+    const password = ref("123456")
+    const username = ref("admin")
     const is_remember = ref(false)
     const updateInfo = (newInfo: FormState) => {
       username.value = newInfo.username
       password.value = newInfo.password
-      is_remember.value = newInfo.remember
+      is_remember.value = newInfo.is_remember
     }
     const updateToken = (newAccessToken: string, newRefreshToken: string) => {
       access_token.value = newAccessToken

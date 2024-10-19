@@ -22,8 +22,8 @@ export type ContextItem = AssistantContextItem | UserContextItem
 export interface FormState {
   username: string
   password: string
-  captchaCode?: string
-  remember: boolean
+  is_remember: boolean
+  captcha_code: string
 }
 
 export interface CaptchaItem {
