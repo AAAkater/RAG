@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import LoginLogo from "./components/LoginLogo.vue"
 import LoginForm from "./components/LoginForm.vue"
+import RegisterForm from "./components/RegisterForm.vue"
+import { computed, ref } from "vue"
+import { useRoute } from "vue-router"
+const route = useRoute()
+const isLogin = ref(computed(() => route.path === "/login"))
 </script>
 
 <template>
@@ -13,7 +18,12 @@ import LoginForm from "./components/LoginForm.vue"
   >
     <div :class="['h-1/2 w-1/2 min-w-80', 'flex shadow-2xl']">
       <LoginLogo />
-      <LoginForm />
+      <div
+        class="flex h-full w-1/2 items-center justify-center outline max-sm:w-full"
+      >
+        <LoginForm v-if="isLogin" />
+        <RegisterForm v-else />
+      </div>
     </div>
   </div>
 </template>

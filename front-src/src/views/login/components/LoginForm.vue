@@ -14,6 +14,7 @@ import {
   Checkbox,
   Button,
   Space,
+  message,
 } from "ant-design-vue"
 import { useUserStore } from "@/stores"
 import { type FormState } from "@/types"
@@ -127,73 +128,86 @@ const onSubmit = async () => {
   //   console.log(err)
   // }
 }
+const onRegisterClick = () => {
+  router.push("/register")
+}
+const onForgotClick = () => {
+  message.warning("我还在写QAQ")
+}
 </script>
 
 <template>
-  <div class="flex h-full w-1/2 items-center justify-center max-sm:w-full">
-    <Form
-      name="basic"
-      :wrapper-col="{ span: 24 }"
-      autocomplete="off"
-    >
-      <!-- 登录框 -->
-      <Form.Item v-bind="validateInfos.username">
+  <Form
+    :wrapper-col="{ span: 24 }"
+    autocomplete="off"
+  >
+    <!-- 登录框 -->
+    <Form.Item v-bind="validateInfos.username">
+      <Input
+        v-model:value="modelRef.username"
+        placeholder="账号"
+        :prefix="h(UserOutlined)"
+      />
+    </Form.Item>
+    <!-- 密码框 -->
+    <Form.Item v-bind="validateInfos.password">
+      <Input.Password
+        v-model:value="modelRef.password"
+        placeholder="密码"
+        :prefix="h(LockOutlined)"
+      />
+    </Form.Item>
+    <!-- 验证码 -->
+    <Space>
+      <Form.Item v-bind="validateInfos.captcha_code">
         <Input
-          v-model:value="modelRef.username"
-          placeholder="账号"
-          :prefix="h(UserOutlined)"
+          v-model:value="modelRef.captcha_code"
+          placeholder="验证码"
+          :controls="false"
+          :prefix="h(SafetyCertificateOutlined)"
         />
       </Form.Item>
-      <!-- 密码框 -->
-      <Form.Item v-bind="validateInfos.password">
-        <Input.Password
-          v-model:value="modelRef.password"
-          placeholder="密码"
-          :prefix="h(LockOutlined)"
+      <Form.Item>
+        <Image
+          :src="`data:image/png;base64,${captcha.base64}`"
+          @click="onCaptchaClick"
+          :preview="false"
+          fallback=""
         />
       </Form.Item>
-      <!-- 验证码 -->
-      <Space>
-        <Form.Item v-bind="validateInfos.captcha_code">
-          <Input
-            v-model:value="modelRef.captcha_code"
-            placeholder="验证码"
-            :controls="false"
-            :prefix="h(SafetyCertificateOutlined)"
-          />
-        </Form.Item>
-        <Form.Item>
-          <Image
-            :src="`data:image/png;base64,${captcha.base64}`"
-            @click="onCaptchaClick"
-            :preview="false"
-            fallback=""
-          />
-        </Form.Item>
-      </Space>
-      <!-- 选项 -->
-      <Form.Item>
-        <div class="flex justify-between">
-          <div>
-            <Checkbox v-model:checked="modelRef.is_remember"> 记住我 </Checkbox>
-          </div>
-          <Button
-            type="primary"
-            html-type="submit"
-            @click="onSubmit"
-            >登录
-          </Button>
+    </Space>
+    <!-- 选项 -->
+    <Form.Item>
+      <div class="flex justify-between">
+        <div>
+          <Checkbox v-model:checked="modelRef.is_remember"> 记住我 </Checkbox>
         </div>
-      </Form.Item>
-      <!-- 注册与找回 -->
-      <Form.Item>
-        <div class="flex justify-between">
-          <a href="">点击注册</a>
-          <a href="">忘记密码?</a>
-        </div>
-      </Form.Item>
-    </Form>
-  </div>
+        <Button
+          type="primary"
+          html-type="submit"
+          @click="onSubmit"
+          >登录
+        </Button>
+      </div>
+    </Form.Item>
+    <!-- 注册与找回 -->
+    <Form.Item>
+      <div class="flex justify-between">
+        <Button
+          type="link"
+          @click="onRegisterClick"
+        >
+          点击注册
+        </Button>
+        <Button
+          @click="onForgotClick"
+          type="link"
+        >
+          忘记密码?
+        </Button>
+      </div>
+    </Form.Item>
+  </Form>
 </template>
 
 <style scoped></style>
