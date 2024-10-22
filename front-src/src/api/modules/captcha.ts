@@ -16,3 +16,19 @@ export const verifyCaptcha = (
 ): AxiosPromise<ApiResponse> => {
   return request.post(`${baseApiUrl}/captcha/${captcha.id}/${captcha.code}`)
 }
+
+export const getEmailCaptcha = (
+  email_str: string,
+): AxiosPromise<ApiResponse> => {
+  return request.get(`${baseApiUrl}/captcha/email/${email_str}`)
+}
+
+export const verifyEmailCaptcha = (
+  email: string,
+  code: string,
+): AxiosPromise<ApiResponse> => {
+  return request.post(`${baseApiUrl}/captcha/email`, {
+    email: email,
+    email_code: code,
+  })
+}

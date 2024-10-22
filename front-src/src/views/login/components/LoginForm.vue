@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { h, ref } from "vue"
+import { h, ref, toRaw } from "vue"
 import {
   UserOutlined,
   LockOutlined,
@@ -18,7 +18,7 @@ import {
 import { useUserStore } from "@/stores"
 import { type LoginFormState } from "@/types"
 import { useRouter } from "vue-router"
-import { refreshCaptcha } from "@/api"
+import { getCaptcha, refreshCaptcha, userLogin } from "@/api"
 const userStore = useUserStore()
 const useForm = Form.useForm
 const router = useRouter()
@@ -63,17 +63,17 @@ const rulesRef = ref<Record<string, Rule[]>>({
 const { resetFields, validate, validateInfos } = useForm(modelRef, rulesRef)
 
 // 获取验证码
-// const getCaptchaItem = async () => {
-//   const resp = await getCaptcha()
+const getCaptchaItem = async () => {
+  const resp = await getCaptcha()
 
-//   if (resp.status !== 200 || resp.data.code !== "0") {
-//     return
-//   }
-//   // console.log("获取验证码")
-//   const { captchaId, captchaImgBase64 } = resp.data.data!
-//   modelRef.captcha.id = captchaId
-//   modelRef.captcha.base64 = captchaImgBase64
-// }
+  if (resp.status !== 200 || resp.data.code !== "0") {
+    return
+  }
+  // console.log("获取验证码")
+  const { captchaId, captchaImgBase64 } = resp.data.data!
+  captcha.value.id = captchaId
+  captcha.value.base64 = captchaImgBase64
+}
 // getCaptchaItem()
 
 // 点击验证码图片刷新验证码
@@ -90,6 +90,7 @@ const onCaptchaClick = async () => {
     message.info("验证码更新失败!")
   }
 }
+
 // 点击登录
 const onSubmit = async () => {
   try {
@@ -100,34 +101,29 @@ const onSubmit = async () => {
     return
   }
   message.info("登录成功")
-  // try {
-  //   const resp = await userLogin({
-  //     username: modelRef.username,
-  //     password: modelRef.password,
-  //     captchaId: modelRef.captcha.id,
-  //     captchaCode: modelRef.captcha.code,
-  //   })
+  try {
+    const resp = await userLogin({
+      username: modelRef.value.username,
+      password: modelRef.value.password,
+      captcha_id: captcha.value.id,
+      captcha_code: modelRef.value.captcha_code,
+    })
 
-  //   if (resp.status !== 200) {
-  //     throw new Error("登录失败")
-  //   }
-
-  //   // if (resp.status === 404) {
-  //   //   throw new Error("登录失败")
-  //   // }
-  //   // 存储token
-  //   userStore.updateToken(
-  //     resp.data.data!.access_token,
-  //     resp.data.data!.refresh_token,
-  //   )
-  //   // 更新user
-  //   userStore.updateInfo(modelRef)
-  //   message.success("登录成功")
-  //   router.push("/dashboard")
-  // } catch (err) {
-  //   message.error()
-  //   console.log(err)
-  // }
+    if (resp.status !== 200) {
+      throw new Error("登录失败")
+    }
+    // 存储token
+    userStore.updateToken(
+      resp.data.data!.access_token,
+      resp.data.data!.refresh_token,
+    )
+    // 更新user
+    userStore.updateInfo(toRaw(modelRef.value))
+    message.success("登录成功")
+    router.push("/dashboard")
+  } catch (_err) {
+    message.error("登录失败")
+  }
 }
 const onRegisterClick = () => {
   router.push("/register")

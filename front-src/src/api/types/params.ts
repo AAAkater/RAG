@@ -2,11 +2,11 @@ export interface userLoginBody {
   /**
    * 验证码
    */
-  captchaCode: string
+  captcha_code: string
   /**
    * 验证码id
    */
-  captchaId: string
+  captcha_id: string
   /**
    * 密码
    */
@@ -15,4 +15,19 @@ export interface userLoginBody {
    * 用户名
    */
   username: string
+}
+
+export interface userRegisterBody {
+  /**
+   * 邮箱
+   */
+  email: string
+  /**
+   * 邮箱验证码
+   */
+  email_code: string
+  /**
+   * 密码
+   */
+  password: string
 }

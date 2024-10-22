@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { getEmailCaptcha, userRegister } from "@/api"
 import type { RegisterFormState } from "@/types"
 import {
   LockOutlined,
@@ -49,7 +50,7 @@ const rulesRef = ref<Record<string, Rule[]>>({
 const { resetFields, validate, validateInfos } = useForm(modelRef, rulesRef)
 
 // 发送邮件验证码
-const getEmailCaptcha = async () => {
+const sendCaptcha = async () => {
   try {
     const _res = await validate("email")
   } catch (_err) {
@@ -57,6 +58,14 @@ const getEmailCaptcha = async () => {
     resetFields() //清空表单
     return
   }
+
+  const resp = await getEmailCaptcha(modelRef.value.email)
+  if (resp.status !== 200 || resp.data.code !== "0") {
+    message.error("验证码发送失败")
+    return
+  }
+
+  message.info("邮箱验证码已发送")
   // 倒数60s
   let timer: number
   const startCountdown = () => {
@@ -75,7 +84,6 @@ const getEmailCaptcha = async () => {
     }, 1000)
   }
   startCountdown()
-  message.info("邮箱验证码已发送")
 }
 
 // 点击注册
@@ -87,6 +95,18 @@ const onSubmit = async () => {
     resetFields() //清空表单
     return
   }
+  const resp = await userRegister({
+    email: modelRef.value.email,
+    email_code: modelRef.value.email_code,
+    password: modelRef.value.password,
+  })
+
+  if (resp.status !== 200 || resp.data.code !== "0") {
+    message.error("注册失败!")
+    resetFields()
+    return
+  }
+
   message.info("注册成功")
 }
 // 回到登录
@@ -128,7 +148,7 @@ const onLoginClick = () => {
         />
         <Button
           type="default"
-          @click="getEmailCaptcha"
+          @click="sendCaptcha"
           :disabled="sendButton.isDisable"
         >
           {{ sendButton.content }}
