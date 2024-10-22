@@ -15,22 +15,19 @@ const sendButton = ref({
   isDisable: false,
   content: "发送",
 })
+// 表单数据
 const modelRef = ref<RegisterFormState>({
   email: "",
   password: "",
   email_code: "",
 })
-
+// 表单校验规则
 const rulesRef = ref<Record<string, Rule[]>>({
   email: [
     {
       required: true,
-      message: "请输入邮箱",
-      trigger: ["blur", "change"],
-    },
-    {
       type: "email",
-      message: "邮箱格式有误",
+      message: "请输入正确的邮箱格式",
       trigger: ["blur", "change"],
     },
   ],
@@ -54,14 +51,14 @@ const { resetFields, validate, validateInfos } = useForm(modelRef, rulesRef)
 // 发送邮件验证码
 const getEmailCaptcha = async () => {
   try {
-    const res = await validate("email")
-  } catch (err) {
+    const _res = await validate("email")
+  } catch (_err) {
     message.error("错误的邮箱格式")
-    resetFields()
+    resetFields() //清空表单
     return
   }
   // 倒数60s
-  let timer: any = null
+  let timer: number
   const startCountdown = () => {
     let countdown = 60
     sendButton.value.isDisable = true
@@ -81,13 +78,13 @@ const getEmailCaptcha = async () => {
   message.info("邮箱验证码已发送")
 }
 
-// 回到注册
+// 点击注册
 const onSubmit = async () => {
   try {
-    const res = await validate()
-  } catch (err) {
+    const _res = await validate()
+  } catch (_err) {
     message.error("请输入正确的信息")
-    resetFields()
+    resetFields() //清空表单
     return
   }
   message.info("注册成功")
@@ -100,23 +97,28 @@ const onLoginClick = () => {
 
 <template>
   <Form
-    :wrapper-col="{ span: 24 }"
     autocomplete="off"
+    class="w-[225px]"
   >
+    <!-- 邮箱 -->
     <Form.Item v-bind="validateInfos.email">
       <Input
         v-model:value="modelRef.email"
         placeholder="邮箱"
+        :show-count="true"
         :prefix="h(MailOutlined)"
       />
     </Form.Item>
+    <!-- 密码 -->
     <Form.Item v-bind="validateInfos.password">
-      <Input
+      <Input.Password
         v-model:value="modelRef.password"
         placeholder="密码"
+        :show-count="true"
         :prefix="h(LockOutlined)"
       />
     </Form.Item>
+    <!-- 验证码 -->
     <Form.Item v-bind="validateInfos.email_code">
       <Space>
         <Input

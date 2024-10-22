@@ -18,9 +18,7 @@ const isLogin = ref(computed(() => route.path === "/login"))
   >
     <div :class="['h-1/2 w-1/2 min-w-80', 'flex shadow-2xl']">
       <LoginLogo />
-      <div
-        class="flex h-full w-1/2 items-center justify-center outline max-sm:w-full"
-      >
+      <div class="flex h-full w-1/2 items-center justify-center max-sm:w-full">
         <LoginForm v-if="isLogin" />
         <RegisterForm v-else />
       </div>

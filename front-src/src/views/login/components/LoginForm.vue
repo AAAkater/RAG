@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { h, toRaw, ref } from "vue"
+import { h, ref } from "vue"
 import {
   UserOutlined,
   LockOutlined,
@@ -78,26 +78,28 @@ const { resetFields, validate, validateInfos } = useForm(modelRef, rulesRef)
 
 // 点击验证码图片刷新验证码
 const onCaptchaClick = async () => {
-  const resp = await refreshCaptcha(captcha.value.id)
-
-  if (resp.status !== 200 || resp.data.code !== "0") {
+  try {
+    const resp = await refreshCaptcha(captcha.value.id)
+    if (resp.status !== 200 || resp.data.code !== "0") {
+      throw new Error()
+    }
+    const { captchaId, captchaImgBase64 } = resp.data.data!
+    captcha.value.id = captchaId
+    captcha.value.base64 = captchaImgBase64
+  } catch (_err) {
+    message.info("验证码更新失败!")
+  }
+}
+// 点击登录
+const onSubmit = async () => {
+  try {
+    const _res = await validate()
+  } catch (_err) {
+    message.error("请输入正确的信息")
+    resetFields() //清空表单
     return
   }
-  const { captchaId, captchaImgBase64 } = resp.data.data!
-  captcha.value.id = captchaId
-  captcha.value.base64 = captchaImgBase64
-}
-
-const onSubmit = async () => {
-  validate()
-    .then(() => {
-      console.log(toRaw(modelRef))
-    })
-    .catch((err) => {
-      console.log("error", err)
-    })
-  // console.log("校验ok")
-
+  message.info("登录成功")
   // try {
   //   const resp = await userLogin({
   //     username: modelRef.username,
@@ -137,14 +139,15 @@ const onForgotClick = () => {
 
 <template>
   <Form
-    :wrapper-col="{ span: 24 }"
     autocomplete="off"
+    class="w-[225px]"
   >
     <!-- 登录框 -->
     <Form.Item v-bind="validateInfos.username">
       <Input
         v-model:value="modelRef.username"
         placeholder="账号"
+        :show-count="true"
         :prefix="h(UserOutlined)"
       />
     </Form.Item>
@@ -153,6 +156,7 @@ const onForgotClick = () => {
       <Input.Password
         v-model:value="modelRef.password"
         placeholder="密码"
+        :show-count="true"
         :prefix="h(LockOutlined)"
       />
     </Form.Item>
@@ -162,7 +166,6 @@ const onForgotClick = () => {
         <Input
           v-model:value="modelRef.captcha_code"
           placeholder="验证码"
-          :controls="false"
           :prefix="h(SafetyCertificateOutlined)"
         />
       </Form.Item>
