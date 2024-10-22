@@ -1,4 +1,4 @@
-import { type FormState } from "@/types"
+import { type LoginFormState } from "@/types"
 import { defineStore } from "pinia"
 import { ref } from "vue"
 export const useUserStore = defineStore(
@@ -9,7 +9,7 @@ export const useUserStore = defineStore(
     const password = ref("123456")
     const username = ref("admin")
     const is_remember = ref(false)
-    const updateInfo = (newInfo: FormState) => {
+    const updateInfo = (newInfo: LoginFormState) => {
       username.value = newInfo.username
       password.value = newInfo.password
       is_remember.value = newInfo.is_remember

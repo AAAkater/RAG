@@ -19,7 +19,7 @@ export interface UserContextItem {
 
 export type ContextItem = AssistantContextItem | UserContextItem
 
-export interface FormState {
+export interface LoginFormState {
   username: string
   password: string
   is_remember: boolean
@@ -30,4 +30,10 @@ export interface CaptchaItem {
   id: string
   code: string
   base64: string
+}
+
+export interface RegisterFormState {
+  email: string
+  password: string
+  email_code: string
 }

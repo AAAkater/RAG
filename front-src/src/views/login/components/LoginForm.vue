@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { reactive, h, toRaw, ref } from "vue"
+import { h, toRaw, ref } from "vue"
 import {
   UserOutlined,
   LockOutlined,
@@ -10,14 +10,13 @@ import {
   Form,
   Input,
   Image,
-  Flex,
   Checkbox,
   Button,
   Space,
   message,
 } from "ant-design-vue"
 import { useUserStore } from "@/stores"
-import { type FormState } from "@/types"
+import { type LoginFormState } from "@/types"
 import { useRouter } from "vue-router"
 import { refreshCaptcha } from "@/api"
 const userStore = useUserStore()
@@ -28,7 +27,7 @@ const captcha = ref({
   base64: "",
 })
 // 表单数据
-const modelRef = reactive<FormState>({
+const modelRef = ref<LoginFormState>({
   username: userStore.username,
   password: userStore.password,
   is_remember: false,
@@ -36,7 +35,7 @@ const modelRef = reactive<FormState>({
 })
 
 // 校验规则
-const rulesRef = reactive<Record<string, Rule[]>>({
+const rulesRef = ref<Record<string, Rule[]>>({
   username: [
     {
       required: true,
