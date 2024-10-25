@@ -1,23 +1,16 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from typing import Annotated, Generator
 
-DATABASE_NAME = "rag"
+from app.core.config import settings
+from app.db.database import engine
+from fastapi import Depends
+from sqlmodel import Session, create_engine
 
-SQLALCHEMY_DATABASE_URL = f"mysql+pymysql://root:1234@localhost:3306/{DATABASE_NAME}"
-
-
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-)
-# SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Base = declarative_base()
+engine = create_engine(url=str(settings.SQLALCHEMY_DATABASE_URI), echo=True)
 
 
-if __name__ == "__main__":
-    # with engine.connect() as connection:
-    #     result = connection.execute("show databases")
-    #     print(result)
+def get_db_session() -> Generator[Session, None, None]:
+    with Session(bind=engine) as session:
+        yield session
 
-    pass
+
+SessionDep = Annotated[Session, Depends(get_db_session)]
