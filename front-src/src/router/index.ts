@@ -26,12 +26,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import("@/views/dashboard/knowledge_base/index.vue"),
       },
       {
-        path: "dialog",
+        path: "chat",
         meta: {
           title: "对话",
           noAuth: true,
         },
-        component: () => import("@/views/dashboard/dialog/index.vue"),
+        component: () => import("@/views/dashboard/chat/index.vue"),
       },
     ],
   },

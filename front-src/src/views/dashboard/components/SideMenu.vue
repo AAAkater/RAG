@@ -34,7 +34,7 @@ const items = ref([
     label: "对话",
     title: "在这里查看所有会话记录",
     click: () => {
-      router.push("/dashboard/dialog")
+      router.push("/dashboard/chat")
     },
   },
 ])
