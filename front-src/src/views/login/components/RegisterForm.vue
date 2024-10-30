@@ -141,18 +141,21 @@ const onLoginClick = () => {
     <!-- 验证码 -->
     <Form.Item v-bind="validateInfos.email_code">
       <Space>
-        <Input
+        <Input.Search
           v-model:value="modelRef.email_code"
           placeholder="邮箱验证码"
           :prefix="h(SafetyCertificateOutlined)"
-        />
-        <Button
-          type="default"
-          @click="sendCaptcha"
-          :disabled="sendButton.isDisable"
         >
-          {{ sendButton.content }}
-        </Button>
+          <template #enterButton>
+            <Button
+              type="default"
+              @click="sendCaptcha"
+              :disabled="sendButton.isDisable"
+            >
+              {{ sendButton.content }}
+            </Button>
+          </template>
+        </Input.Search>
       </Space>
     </Form.Item>
     <Form.Item>
