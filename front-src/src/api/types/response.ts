@@ -1,8 +1,17 @@
-export interface ApiResponse<T = void> {
+export interface SuccessResponse<T = void> {
   code: string
   msg: string
   data?: T
 }
+
+export interface ErrorResponse {
+  detail: string
+}
+
+export type ApiResponse<T = void> =
+  | (SuccessResponse<T> & { success: true })
+  | (ErrorResponse & { success: false })
+
 export interface captchaItem {
   captchaId: string
   captchaCode?: string

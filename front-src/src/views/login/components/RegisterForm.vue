@@ -60,13 +60,13 @@ const sendCaptcha = async () => {
   }
 
   const resp = await getEmailCaptcha(modelRef.value.email)
-  if (resp.status !== 200 || resp.data.code !== "0") {
-    message.error("验证码发送失败")
+  if (!resp.data.success) {
+    message.error(resp.data.detail)
     return
   }
 
-  message.info("邮箱验证码已发送")
-  // 倒数60s
+  message.success("邮箱验证码已发送")
+  // 倒数60s 禁止再次发送
   let timer: number
   const startCountdown = () => {
     let countdown = 60
@@ -101,13 +101,14 @@ const onSubmit = async () => {
     password: modelRef.value.password,
   })
 
-  if (resp.status !== 200 || resp.data.code !== "0") {
-    message.error("注册失败!")
+  if (!resp.data.success) {
+    message.error(resp.data.detail)
     resetFields()
     return
   }
 
-  message.info("注册成功")
+  message.success("注册成功")
+  router.push("/login")
 }
 // 回到登录
 const onLoginClick = () => {

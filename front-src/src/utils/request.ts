@@ -54,8 +54,7 @@ service.interceptors.response.use(
             },
           },
         )
-        if (resp.status !== 200) {
-          throw new Error("refresh_token已过期")
+        if (!resp.data.success) {
         }
         // 更新旧token
         userStore.updateToken(

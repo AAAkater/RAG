@@ -66,7 +66,8 @@ const { resetFields, validate, validateInfos } = useForm(modelRef, rulesRef)
 const getCaptchaItem = async () => {
   const resp = await getCaptcha()
 
-  if (resp.status !== 200 || resp.data.code !== "0") {
+  if (!resp.data.success) {
+    message.error(resp.data.detail)
     return
   }
   // console.log("获取验证码")
@@ -78,17 +79,15 @@ const getCaptchaItem = async () => {
 
 // 点击验证码图片刷新验证码
 const onCaptchaClick = async () => {
-  try {
-    const resp = await refreshCaptcha(captcha.value.id)
-    if (resp.status !== 200 || resp.data.code !== "0") {
-      throw new Error()
-    }
-    const { captchaId, captchaImgBase64 } = resp.data.data!
-    captcha.value.id = captchaId
-    captcha.value.base64 = captchaImgBase64
-  } catch (_err) {
-    message.info("验证码更新失败!")
+  const resp = await refreshCaptcha(captcha.value.id)
+
+  if (!resp.data.success) {
+    message.error(resp.data.detail)
+    return
   }
+  const { captchaId, captchaImgBase64 } = resp.data.data!
+  captcha.value.id = captchaId
+  captcha.value.base64 = captchaImgBase64
 }
 
 // 点击登录
@@ -100,7 +99,6 @@ const onSubmit = async () => {
     resetFields() //清空表单
     return
   }
-  message.info("登录成功")
   try {
     const resp = await userLogin({
       username: modelRef.value.username,
@@ -109,8 +107,16 @@ const onSubmit = async () => {
       captcha_code: modelRef.value.captcha_code,
     })
 
-    if (resp.status !== 200) {
-      throw new Error("登录失败")
+    if (!resp.data.success) {
+      message.error(resp.data.detail)
+      resetFields() //清空表单
+      return
+    }
+
+    if (resp.data.code !== "0") {
+      message.error(resp.data.msg)
+      resetFields() //清空表单
+      return
     }
     // 存储token
     userStore.updateToken(
@@ -122,7 +128,7 @@ const onSubmit = async () => {
     message.success("登录成功")
     router.push("/dashboard")
   } catch (_err) {
-    message.error("登录失败")
+    message.error("未知错误,登录失败")
   }
 }
 const onRegisterClick = () => {
