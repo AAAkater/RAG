@@ -1,3 +1,5 @@
+import secrets
+
 from pydantic import PostgresDsn, computed_field
 from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -32,6 +34,12 @@ class Settings(BaseSettings):
     SMTP_USERNAME: str | None = None
     SMTP_PASSWORD: str | None = None
     EMAIL_FROM_NAME: str | None = None
+
+    # TOKEN
+    SECRET_KEY: str = secrets.token_urlsafe(nbytes=32)
+    # 60 minutes * 24 hours * 8 days = 8 days 八天有效期
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+    API_VER_STR: str = "/api/v1"
 
     # TODO: MILVUS settings
 
