@@ -1,6 +1,6 @@
-from typing import Any, Dict, Generic, List, TypeVar
+from typing import Any, Generic, List, TypeVar
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 T = TypeVar("T")
 
@@ -31,6 +31,29 @@ class MetadataItem(BaseModel):
 class CaptchaItem(BaseModel):
     captchaId: str
     captchaImgBase64: str
+
+
+class EmailCaptchaBody(BaseModel):
+    email: str
+    email_code: str | None = None
+
+
+class UserRegisterBody(BaseModel):
+    email: str
+    email_code: str
+    password: str
+
+
+class UserLoginBody(BaseModel):
+    username: str
+    password: str
+    captcha_id: str
+    captcha_code: str
+
+
+class TokenPayLoad(BaseModel):
+    exp: str
+    sub: str
 
 
 if __name__ == "__main__":
