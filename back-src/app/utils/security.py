@@ -16,17 +16,17 @@ reusable_oauth2 = OAuth2PasswordBearer(
 )
 
 
-def create_access_token(subject: str):
+def create_access_token(subject: str) -> str:
     expire = datetime.now(tz=timezone.utc) + timedelta(
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
 
     to_encode = TokenPayLoad(
         exp=expire,
-        sub=subject,
+        sub=str(subject),
     ).model_dump()
-    encode_jwt = jwt.encode(
-        payload=to_encode,
+    encode_jwt: str = jwt.encode(
+        claims=to_encode,
         key=settings.SECRET_KEY,
         algorithm=ALGORITHM,
     )

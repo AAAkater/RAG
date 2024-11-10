@@ -1,4 +1,6 @@
+from datetime import datetime
 from typing import Any, Generic, List, TypeVar
+from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -33,6 +35,11 @@ class CaptchaItem(BaseModel):
     captchaImgBase64: str
 
 
+class TokenItem(BaseModel):
+    access_token: str
+    token_type: str = Field(default="Bearer")
+
+
 class EmailCaptchaBody(BaseModel):
     email: str
     email_code: str | None = None
@@ -52,7 +59,7 @@ class UserLoginBody(BaseModel):
 
 
 class TokenPayLoad(BaseModel):
-    exp: str
+    exp: datetime
     sub: str
 
 
