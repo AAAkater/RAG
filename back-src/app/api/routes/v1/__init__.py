@@ -1,6 +1,7 @@
 import app.api.routes.v1.captcha as captcha
 import app.api.routes.v1.chat as chat
 import app.api.routes.v1.knowledge_base as knowledge_base
+import app.api.routes.v1.login as login
 import app.api.routes.v1.metadata as metadata
 import app.api.routes.v1.user as user
 from fastapi import APIRouter
@@ -31,4 +32,9 @@ v1_router.include_router(
     router=captcha.router,
     prefix="/v1",
     tags=["verify"],
+)
+v1_router.include_router(
+    router=login.router,
+    prefix="/v1",
+    tags=["login"],
 )

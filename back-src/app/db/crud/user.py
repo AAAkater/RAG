@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from app.db.models.user import User, UserInfoUpdate, UserRegister
+from fastapi import HTTPException, status
 from pydantic import EmailStr
 from sqlmodel import Session, select
 
@@ -25,7 +26,10 @@ def create_user(*, session: Session, new_user: UserRegister):
 def authenticate_user(*, session: Session, email: EmailStr, password: str):
     db_user = get_user_by_email(session=session, email=email)
     if not db_user:
-        return None
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="账号不存在",
+        )
     if password != db_user.password:
         return None
     return db_user
