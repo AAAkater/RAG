@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { getEmailCaptcha, userRegister } from "@/api"
+import { API } from "@/api"
 import type { RegisterFormState } from "@/types"
 import {
   LockOutlined,
@@ -8,6 +8,7 @@ import {
 } from "@ant-design/icons-vue"
 import { Button, Form, Input, message, Space } from "ant-design-vue"
 import type { Rule } from "ant-design-vue/es/form"
+import { AxiosError, type AxiosResponse } from "axios"
 import { h, ref } from "vue"
 import { useRouter } from "vue-router"
 const router = useRouter()
@@ -50,7 +51,7 @@ const rulesRef = ref<Record<string, Rule[]>>({
 const { resetFields, validate, validateInfos } = useForm(modelRef, rulesRef)
 
 // 发送邮件验证码
-const sendCaptcha = async () => {
+const sendEmailCaptcha = async () => {
   try {
     const _res = await validate("email")
   } catch (_err) {
@@ -59,31 +60,67 @@ const sendCaptcha = async () => {
     return
   }
 
-  const resp = await getEmailCaptcha(modelRef.value.email)
-  if (!resp.data.success) {
-    message.error(resp.data.detail)
-    return
-  }
+  API.getEmailCaptcha(modelRef.value.email).then(
+    (resp: AxiosResponse) => {
+      message.success("邮箱验证码已发送")
+      // 倒数60s 禁止再次发送
+      let timer: number
+      const startCountdown = () => {
+        let countdown = 60
+        sendButton.value.isDisable = true
+        sendButton.value.content = `${countdown}s`
 
-  message.success("邮箱验证码已发送")
-  // 倒数60s 禁止再次发送
-  let timer: number
-  const startCountdown = () => {
-    let countdown = 60
-    sendButton.value.isDisable = true
-    sendButton.value.content = `${countdown}s`
-
-    timer = setInterval(() => {
-      countdown--
-      sendButton.value.content = `${countdown}s`
-      if (countdown <= 0) {
-        clearInterval(timer)
-        sendButton.value.isDisable = false
-        sendButton.value.content = `发送`
+        timer = setInterval(() => {
+          countdown--
+          sendButton.value.content = `${countdown}s`
+          if (countdown <= 0) {
+            clearInterval(timer)
+            sendButton.value.isDisable = false
+            sendButton.value.content = `发送`
+          }
+        }, 1000)
       }
-    }, 1000)
-  }
-  startCountdown()
+      startCountdown()
+    },
+    (err: AxiosError) => {
+      message.error(err.response?.data.detail)
+    },
+  )
+
+  // try {
+  //       const resp = await API.getEmailCaptcha(modelRef.value.email)
+
+  // } catch (_err) {
+  //   if (_err instanceof AxiosError) {
+  //     message.error(_err.response?.data.detail)
+  //   }
+
+  //   if (!resp.data.success) {
+  //     console.log(resp.data.detail)
+  //     message.error(resp.data.detail)
+  //     return
+  //   }
+
+  //   message.success("邮箱验证码已发送")
+  //   // 倒数60s 禁止再次发送
+  //   let timer: number
+  //   const startCountdown = () => {
+  //     let countdown = 60
+  //     sendButton.value.isDisable = true
+  //     sendButton.value.content = `${countdown}s`
+
+  //     timer = setInterval(() => {
+  //       countdown--
+  //       sendButton.value.content = `${countdown}s`
+  //       if (countdown <= 0) {
+  //         clearInterval(timer)
+  //         sendButton.value.isDisable = false
+  //         sendButton.value.content = `发送`
+  //       }
+  //     }, 1000)
+  //   }
+  //   startCountdown()
+  // }
 }
 
 // 点击注册
@@ -95,7 +132,7 @@ const onSubmit = async () => {
     resetFields() //清空表单
     return
   }
-  const resp = await userRegister({
+  const resp = await API.userRegister({
     email: modelRef.value.email,
     email_code: modelRef.value.email_code,
     password: modelRef.value.password,
@@ -150,7 +187,7 @@ const onLoginClick = () => {
           <template #enterButton>
             <Button
               type="default"
-              @click="sendCaptcha"
+              @click="sendEmailCaptcha"
               :disabled="sendButton.isDisable"
             >
               {{ sendButton.content }}

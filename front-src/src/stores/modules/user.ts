@@ -14,12 +14,11 @@ export const useUserStore = defineStore(
       password.value = newInfo.password
       is_remember.value = newInfo.is_remember
     }
-    const updateToken = (newAccessToken: string, newRefreshToken: string) => {
+    const updateToken = (newAccessToken: string) => {
       access_token.value = newAccessToken
-      refresh_token.value = newRefreshToken
     }
     const tokenExists = () => {
-      return access_token.value !== "" && refresh_token.value !== ""
+      return access_token.value !== ""
     }
     const removeToken = () => {
       access_token.value = ""

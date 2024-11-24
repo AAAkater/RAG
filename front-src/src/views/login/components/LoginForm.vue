@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { h, ref, toRaw } from "vue"
+import { h, onMounted, ref, toRaw } from "vue"
 import {
   UserOutlined,
   LockOutlined,
@@ -18,7 +18,10 @@ import {
 import { useUserStore } from "@/stores"
 import { type LoginFormState } from "@/types"
 import { useRouter } from "vue-router"
-import { getCaptcha, refreshCaptcha, userLogin } from "@/api"
+import { API } from "@/api"
+import { AxiosError } from "axios"
+import type { ErrorResponse } from "@/api/types/response"
+
 const userStore = useUserStore()
 const useForm = Form.useForm
 const router = useRouter()
@@ -43,8 +46,8 @@ const rulesRef = ref<Record<string, Rule[]>>({
       trigger: ["blur", "change"],
     },
     {
-      pattern: /^[A-Za-z]{3,8}$/,
-      message: "账号必须为3到8位字符",
+      pattern: /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/,
+      message: "账号需为邮箱格式",
       trigger: ["blur", "change"],
     },
   ],
@@ -63,31 +66,28 @@ const rulesRef = ref<Record<string, Rule[]>>({
 const { resetFields, validate, validateInfos } = useForm(modelRef, rulesRef)
 
 // 获取验证码
-const getCaptchaItem = async () => {
-  const resp = await getCaptcha()
-
-  if (!resp.data.success) {
-    message.error(resp.data.detail)
-    return
+const getCaptcha = async () => {
+  try {
+    const resp = await API.getCaptcha()
+    if ("detail" in resp.data) {
+      message.error(resp.data.detail)
+      return
+    }
+    const { captchaId, captchaImgBase64 } = resp.data.data!
+    captcha.value.id = captchaId
+    captcha.value.base64 = captchaImgBase64
+  } catch (err) {
+    if (!(err instanceof AxiosError)) {
+      message.error("未知错误")
+      return
+    }
+    if (err.status === 500) {
+      message.error("服务器内部错误")
+      return
+    }
+    const errData = err.response?.data as ErrorResponse
+    message.error(errData.detail)
   }
-  // console.log("获取验证码")
-  const { captchaId, captchaImgBase64 } = resp.data.data!
-  captcha.value.id = captchaId
-  captcha.value.base64 = captchaImgBase64
-}
-// getCaptchaItem()
-
-// 点击验证码图片刷新验证码
-const onCaptchaClick = async () => {
-  const resp = await refreshCaptcha(captcha.value.id)
-
-  if (!resp.data.success) {
-    message.error(resp.data.detail)
-    return
-  }
-  const { captchaId, captchaImgBase64 } = resp.data.data!
-  captcha.value.id = captchaId
-  captcha.value.base64 = captchaImgBase64
 }
 
 // 点击登录
@@ -100,16 +100,15 @@ const onSubmit = async () => {
     return
   }
   try {
-    const resp = await userLogin({
+    const resp = await API.userLogin({
       username: modelRef.value.username,
       password: modelRef.value.password,
       captcha_id: captcha.value.id,
       captcha_code: modelRef.value.captcha_code,
     })
 
-    if (!resp.data.success) {
+    if ("detail" in resp.data) {
       message.error(resp.data.detail)
-      resetFields() //清空表单
       return
     }
 
@@ -119,16 +118,23 @@ const onSubmit = async () => {
       return
     }
     // 存储token
-    userStore.updateToken(
-      resp.data.data!.access_token,
-      resp.data.data!.refresh_token,
-    )
+    userStore.updateToken(resp.data.data!.access_token)
     // 更新user
     userStore.updateInfo(toRaw(modelRef.value))
     message.success("登录成功")
     router.push("/dashboard")
-  } catch (_err) {
-    message.error("未知错误,登录失败")
+  } catch (err) {
+    if (!(err instanceof AxiosError)) {
+      message.error("未知错误")
+      return
+    }
+    if (err.status === 500) {
+      message.error("服务器内部错误")
+      return
+    }
+    const errData = err.response?.data as ErrorResponse
+    message.error(errData.detail)
+    // resetFields() //清空表单
   }
 }
 const onRegisterClick = () => {
@@ -137,6 +143,10 @@ const onRegisterClick = () => {
 const onForgotClick = () => {
   message.warning("我还在写QAQ")
 }
+
+onMounted(async () => {
+  await getCaptcha()
+})
 </script>
 
 <template>
@@ -174,9 +184,11 @@ const onForgotClick = () => {
       <Form.Item>
         <Image
           :src="`data:image/png;base64,${captcha.base64}`"
-          @click="onCaptchaClick"
+          @click="getCaptcha"
           :preview="false"
           fallback=""
+          height="28px"
+          width="auto"
         />
       </Form.Item>
     </Space>
