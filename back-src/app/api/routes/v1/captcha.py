@@ -46,6 +46,7 @@ async def verify_image_captcha(captcha_id: str, captcha_code: str) -> ResponseBa
     path="/captcha/{old_captcha_id}",
     status_code=status.HTTP_200_OK,
     response_model=ResponseBase[CaptchaItem],
+    deprecated=True,
     summary="刷新图像验证码",
 )
 async def refresh_captcha(old_captcha_id: str) -> ResponseBase[CaptchaItem]:
@@ -69,10 +70,10 @@ async def refresh_captcha(old_captcha_id: str) -> ResponseBase[CaptchaItem]:
     response_model=ResponseBase,
     summary="获取邮箱验证码",
 )
-async def get_email_captcha(item: EmailCaptchaBody) -> ResponseBase:
+async def get_email_captcha(email: str) -> ResponseBase:
     # 校验邮箱格式
     try:
-        _ = validate_email(value=item.email)
+        _ = validate_email(value=email)
     except PydanticCustomError as e:
         logger.error(e)
         raise HTTPException(
@@ -80,7 +81,7 @@ async def get_email_captcha(item: EmailCaptchaBody) -> ResponseBase:
             detail="邮箱格式错误",
         )
     # 查看邮箱验证码是否仍有效
-    if redis_client.exists(item.email):
+    if redis_client.exists(email):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="验证码请求频繁",
@@ -90,7 +91,7 @@ async def get_email_captcha(item: EmailCaptchaBody) -> ResponseBase:
     # 发送邮箱验证码
     try:
         await send_email(
-            email=item.email,
+            email=email,
             captcha=captcha_code,
         )
     except Exception as e:
@@ -101,7 +102,7 @@ async def get_email_captcha(item: EmailCaptchaBody) -> ResponseBase:
         )
     # 一分钟有效时间
     redis_client.setex(
-        name=item.email,
+        name=email,
         value=captcha_code,
         time=60,
     )
