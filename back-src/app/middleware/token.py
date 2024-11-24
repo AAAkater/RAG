@@ -5,8 +5,10 @@ from fastapi import HTTPException, Request, Response, status
 from starlette.middleware.base import BaseHTTPMiddleware
 
 no_auth_paths = [
-    f"{settings.API_VER_STR}/session",
+    f"{settings.API_VER_STR}/login",
     f"{settings.API_VER_STR}/user",
+    f"{settings.API_VER_STR}/captcha",
+    f"{settings.API_VER_STR}/captcha/email",
     "/docs",
     "/openapi.json",
 ]
