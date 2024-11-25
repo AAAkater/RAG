@@ -1,3 +1,4 @@
+import { emitter } from "@/utils/evenEmitter"
 import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router"
 const routes: RouteRecordRaw[] = [
   {
@@ -58,4 +59,7 @@ const router = createRouter({
   routes: routes,
 })
 
+emitter.on("API_UN_AUTH", () => {
+  router.push("/login")
+})
 export default router

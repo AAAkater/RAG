@@ -4,6 +4,7 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios"
+import { emitter } from "./evenEmitter"
 // import { useRouter } from "vue-router"
 
 const successRequestHandler = (config: InternalAxiosRequestConfig) => {
@@ -27,49 +28,19 @@ const successResponseHandler = (resp: AxiosResponse) => {
   return resp
 }
 const errorResponseHandler = async (err: AxiosError) => {
-  // if (err.status === 500) {
-  //   return Promise.reject(err)
-  // }
-  // const errData = err.response?.data as ErrorResponse
-  // err.response!.data = { ...errData, success: false }
-  // console.log(err.response?.data)
-  // const originalRequest = err.config
-
-  // 设置token的无感刷新
-  // 用refresh_token去更新access_token
-  // if (
-  //   !err.config?.url?.endsWith("/session") &&
-  //   err.response?.status === 401
-  // ) {
-  //   try {
-  //     const resp: AxiosResponse<ApiResponse<tokenItem>> = await axios.put(
-  //       "http://127.0.0.1:8000/api/v1/session",
-  //       {},
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${userStore.refresh_token}`,
-  //         },
-  //       },
-  //     )
-  //     if (!resp.data.success) {
-  //     }
-  //     // 更新旧token
-  //     userStore.updateToken(
-  //       resp.data.data!.access_token,
-  //       resp.data.data!.refresh_token,
-  //     )
-
-  //     // 重新设置原请求的token
-  //     originalRequest!.headers.Authorization = `Bearer ${userStore.access_token}`
-
-  //     return service(originalRequest!)
-  //   } catch (refreshError) {
-  //     // 失败切换到登录页
-  //     console.log(refreshError)
-  //     userStore.removeToken()
-  //     router.push("/login")
-  //   }
-  // }
+  const status = err.status!
+  switch (status) {
+    case 500: {
+      emitter.emit("API_INTERNAL_SERVER_ERROR")
+      break
+    }
+    case 401: {
+      emitter.emit("API_UN_AUTH")
+      break
+    }
+    default:
+      break
+  }
   return Promise.reject(err)
 }
 
