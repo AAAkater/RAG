@@ -1,23 +1,51 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from datetime import datetime
+from typing import Annotated, Generator
 
-DATABASE_NAME = "rag"
-
-SQLALCHEMY_DATABASE_URL = f"mysql+pymysql://root:1234@localhost:3306/{DATABASE_NAME}"
-
+from app.core.config import settings
+from app.db.models.test import Test, TestCreate
+from app.db.models.user import User, UserRegister
+from fastapi import Depends
+from sqlmodel import Session, SQLModel, create_engine
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
+    url=str(settings.SQLALCHEMY_DATABASE_URI),
+    # echo=True,
 )
-# SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Base = declarative_base()
+
+def get_db_session() -> Generator[Session, None, None]:
+    with Session(bind=engine) as session:
+        yield session
+
+
+SessionDep = Annotated[Session, Depends(get_db_session)]
+
+# def init_db(session:Session):
 
 
 if __name__ == "__main__":
-    # with engine.connect() as connection:
-    #     result = connection.execute("show databases")
-    #     print(result)
+    SQLModel.metadata.create_all(engine)
+    with Session(bind=engine) as session:
+        #     db_item = Test.model_validate(
+        #         TestCreate,
+        #         update={
+        #             "name": "qweqwe",
+        #             "create_time": int(time.time()),
+        #         },
+        #     )
+        #     session.add(db_item)
+        #     session.commit()
+        #     session.refresh(db_item)
 
-    pass
+        db_user = User.model_validate(
+            UserRegister,
+            update={
+                "email": "1318382761@qq.com",
+                "username": "yyy",
+                "password": "asdsadfasfas",
+                "create_time": datetime.now(),
+            },
+        )
+
+        session.add(db_user)
+        session.commit()

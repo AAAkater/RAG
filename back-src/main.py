@@ -1,10 +1,8 @@
+from app.api import api_router
+from app.middleware import app_middlewares
 from fastapi import FastAPI
 
-from app.api import api_router
-
-app = FastAPI()
-
-
+app = FastAPI(middleware=app_middlewares)
 app.include_router(api_router)
 
 

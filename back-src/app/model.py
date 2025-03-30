@@ -1,24 +1,21 @@
-from typing import Any, Dict, List
+from datetime import datetime
+from typing import Any, Generic, List, TypeVar
+from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
+
+T = TypeVar("T")
 
 
-class State404Response(BaseModel):
+class ResponseBase(BaseModel, Generic[T]):
     code: str = Field(default="0", description="Business Code")
-    msg: str = Field(default="Resource does not exist")
-    data: Any = None
+    msg: str = Field(default="ok")
+    data: T | None = None
 
 
 class UploadMetadataItem(BaseModel):
     knowledge_base_name: str = Field(default="")
     files: List[str] = Field(default=[])
-
-
-class UploadMetadataResponse(BaseModel):
-
-    code: str = Field(default="0", description="Business Code")
-    msg: str = Field(default="ok")
-    data: UploadMetadataItem | None = Field(default=None)
 
 
 class MetadataItem(BaseModel):
@@ -33,34 +30,43 @@ class MetadataItem(BaseModel):
     totalPageNum: int
 
 
-class GetMetadataItemsResponse(BaseModel):
-
-    code: str = Field(default="0", description="Business Code")
-    msg: str = Field(default="ok")
-    data: MetadataItem
-
-
 class CaptchaItem(BaseModel):
     captchaId: str
     captchaImgBase64: str
 
 
-class GetCaptchaResponse(BaseModel):
-    code: str
-    msg: str
-    data: CaptchaItem
+class TokenItem(BaseModel):
+    access_token: str
+    token_type: str = Field(default="Bearer")
 
 
-class VerifyGetCaptchaResponse(BaseModel):
-    code: str
-    msg: str
-    data: Any
+class EmailCaptchaBody(BaseModel):
+    email: str
+    email_code: str | None = None
+
+
+class UserRegisterBody(BaseModel):
+    email: str
+    email_code: str
+    password: str
+
+
+class UserLoginBody(BaseModel):
+    username: str
+    password: str
+    captcha_id: str
+    captcha_code: str
+
+
+class TokenPayLoad(BaseModel):
+    exp: datetime
+    sub: str
 
 
 if __name__ == "__main__":
-    data = State404Response(
+    data = ResponseBase[UploadMetadataItem](
         code="0",
-        msg=f"The knowledge base does not exist:",
-        data=None,
-    ).model_dump_json()
-    print(data)
+        msg="ok",
+        data=UploadMetadataItem(knowledge_base_name="ddd", files=["asdasd.png"]),
+    )
+    print(data.model_dump())
