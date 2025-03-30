@@ -11,8 +11,11 @@ const selectedKeys = ref<string[]>([""])
 
 const router = useRouter()
 
-const startOnclick = () => {
+const onStartClick = () => {
   router.push("/dashboard")
+}
+const onUserClick = () => {
+  router.push("./login")
 }
 </script>
 
@@ -43,7 +46,7 @@ const startOnclick = () => {
           <GithubOutlined />
         </Menu.Item>
         <Menu.Item>
-          <Avatar>
+          <Avatar @click="onUserClick">
             <template #icon>
               <UserOutlined />
             </template>
@@ -67,7 +70,7 @@ const startOnclick = () => {
                 :icon="h(RightOutlined)"
                 size="large"
                 shape="round"
-                @click="startOnclick"
+                @click="onStartClick"
               >
                 快速上手
               </Button>

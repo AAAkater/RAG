@@ -2,7 +2,7 @@
 import MetaDisplay from "@/components/MetaDisplay.vue"
 import { apiBase } from "@/constants"
 import type { ContextItem } from "@/types"
-import openNotification from "@/util/openNotification"
+import openNotification from "@/utils/openNotification"
 
 import axios from "axios"
 import { nextTick, ref } from "vue"
